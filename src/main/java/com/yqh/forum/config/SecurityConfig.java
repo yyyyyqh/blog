@@ -19,7 +19,7 @@ public class SecurityConfig {
             .csrf().disable()
             .authorizeRequests()
                 .antMatchers("/", "/post", "/post/search", "/post/*", "/user/register", "/user/login", 
-                           "/css/**", "/js/**", "/_static/**", "/webjars/**", "/images/**").permitAll()
+                           "/css/**", "/js/**", "/images/**", "/uploads/**", "/_static/**", "/webjars/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
             .formLogin()

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>个人资料 - 论坛系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .profile-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+        }
+        .profile-info {
+            margin-bottom: 20px;
+        }
+        .profile-info-item {
+            margin-bottom: 15px;
+        }
+        .profile-info-label {
+            font-weight: bold;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="profile-container">
+            <div class="profile-header">
+                <img th:src="${user.avatar}" alt="用户头像" class="avatar">
+                <h2 th:text="${user.username}">用户名</h2>
+            </div>
+            
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+            
+            <div class="profile-info">
+                <div class="profile-info-item">
+                    <div class="profile-info-label">电子邮箱</div>
+                    <div th:text="${user.email}">邮箱地址</div>
+                </div>
+                
+                <div class="profile-info-item">
+                    <div class="profile-info-label">注册时间</div>
+                    <div th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd HH:mm:ss')}">注册时间</div>
+                </div>
+                
+                <div class="profile-info-item">
+                    <div class="profile-info-label">最后更新</div>
+                    <div th:text="${#temporals.format(user.updatedAt, 'yyyy-MM-dd HH:mm:ss')}">更新时间</div>
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2">
+                <a th:href="@{/user/profile/edit}" class="btn btn-primary">编辑资料</a>
+                <a th:href="@{/user/profile/password}" class="btn btn-outline-primary">修改密码</a>
+                <a th:href="@{/post}" class="btn btn-secondary">返回首页</a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

@@ -8,13 +8,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Controller
 @RequestMapping("/user")
@@ -22,6 +24,7 @@ import javax.validation.Valid;
 public class UserController {
 
     private final UserService userService;
+    private static final String UPLOAD_DIR = "src/main/resources/static/uploads/avatars/";
 
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
@@ -68,16 +71,59 @@ public class UserController {
 
     @PostMapping("/profile/edit")
     public String updateProfile(@ModelAttribute UserDTO userDTO,
+                              @RequestParam("avatarFile") MultipartFile avatarFile,
                               RedirectAttributes redirectAttributes) {
         try {
             User currentUser = userService.getCurrentUser();
+            
+            // 处理头像上传
+            if (avatarFile != null && !avatarFile.isEmpty()) {
+                String fileName = currentUser.getId() + "_" + System.currentTimeMillis() + 
+                                avatarFile.getOriginalFilename().substring(avatarFile.getOriginalFilename().lastIndexOf("."));
+                
+                // 确保上传目录存在
+                Path uploadPath = Paths.get(UPLOAD_DIR);
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+                
+                // 保存文件
+                Path filePath = uploadPath.resolve(fileName);
+                Files.copy(avatarFile.getInputStream(), filePath);
+                
+                // 更新用户头像URL
+                currentUser.setAvatar("/uploads/avatars/" + fileName);
+            }
+            
+            // 更新其他信息
             currentUser.setEmail(userDTO.getEmail());
             userService.updateUser(currentUser);
-            redirectAttributes.addFlashAttribute("successMessage", "个人信息更新成功");
+            
+            redirectAttributes.addFlashAttribute("successMessage", "个人资料更新成功");
             return "redirect:/user/profile";
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "更新失败：" + e.getMessage());
+        } catch (IOException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "头像上传失败：" + e.getMessage());
             return "redirect:/user/profile/edit";
+        }
+    }
+
+    @GetMapping("/profile/password")
+    public String showChangePasswordForm() {
+        return "user/change-password";
+    }
+
+    @PostMapping("/profile/password")
+    public String changePassword(@RequestParam("currentPassword") String currentPassword,
+                               @RequestParam("newPassword") String newPassword,
+                               @RequestParam("confirmPassword") String confirmPassword,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            userService.changePassword(currentPassword, newPassword, confirmPassword);
+            redirectAttributes.addFlashAttribute("successMessage", "密码修改成功");
+            return "redirect:/user/profile";
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/user/profile/password";
         }
     }
 } 

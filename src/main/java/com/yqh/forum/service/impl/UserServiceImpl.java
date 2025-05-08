@@ -80,6 +80,26 @@ public class UserServiceImpl implements UserService {
         return userRepository.existsByEmail(email);
     }
 
+    @Override
+    @Transactional
+    public void changePassword(String currentPassword, String newPassword, String confirmPassword) {
+        User user = getCurrentUser();
+        
+        // 验证当前密码
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new RuntimeException("当前密码错误");
+        }
+        
+        // 验证新密码
+        if (!newPassword.equals(confirmPassword)) {
+            throw new RuntimeException("两次输入的新密码不一致");
+        }
+        
+        // 更新密码
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
     private UserDTO convertToDTO(User user) {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
