@@ -22,6 +22,17 @@
                             </div>
                             
                             <div class="mb-3">
+                                <label for="category" class="form-label">分类</label>
+                                <select class="form-select" id="category" th:field="*{category.id}" required>
+                                    <option value="">请选择分类</option>
+                                    <option th:each="category : ${categories}"
+                                            th:value="${category.id}"
+                                            th:text="${category.name}"></option>
+                                </select>
+                                <div class="text-danger" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></div>
+                            </div>
+                            
+                            <div class="mb-3">
                                 <label for="content" class="form-label">内容</label>
                                 <textarea class="form-control" id="content" th:field="*{content}" rows="10" required></textarea>
                                 <div class="text-danger" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>

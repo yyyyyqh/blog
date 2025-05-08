@@ -6,28 +6,17 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "posts")
-public class Post {
+@Table(name = "categories")
+public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String title;
+    @Column(nullable = false, unique = true)
+    private String name;
 
-    @Column(columnDefinition = "TEXT")
-    private String content;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User author;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
-
-    @Column(name = "view_count")
-    private Integer viewCount = 0;
+    @Column(length = 500)
+    private String description;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

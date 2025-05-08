@@ -4,13 +4,10 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class PostDTO {
+public class CategoryDTO {
     private Long id;
-    private String title;
-    private String content;
-    private UserDTO author;
-    private CategoryDTO category;
-    private Integer viewCount;
+    private String name;
+    private String description;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 } 

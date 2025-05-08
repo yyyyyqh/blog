@@ -20,7 +20,26 @@
         </div>
 
         <div class="row">
-            <div class="col">
+            <div class="col-md-3">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">分类</h5>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a th:href="@{/post}" class="list-group-item list-group-item-action" th:classappend="${categoryId == null} ? 'active'">
+                            全部
+                        </a>
+                        <a th:each="category : ${categories}"
+                           th:href="@{/post(categoryId=${category.id})}"
+                           th:text="${category.name}"
+                           class="list-group-item list-group-item-action"
+                           th:classappend="${categoryId == category.id} ? 'active'">
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-9">
                 <div class="list-group">
                     <div th:each="post : ${posts}" class="list-group-item list-group-item-action">
                         <div class="d-flex w-100 justify-content-between">
@@ -31,9 +50,14 @@
                         </div>
                         <p class="mb-1" th:text="${#strings.abbreviate(post.content, 200)}"></p>
                         <div class="d-flex justify-content-between align-items-center">
-                            <small>
-                                作者：<span th:text="${post.author.username}"></span>
-                            </small>
+                            <div>
+                                <small>
+                                    作者：<span th:text="${post.author.username}"></span>
+                                </small>
+                                <small class="ms-3">
+                                    分类：<span th:text="${post.category.name}"></span>
+                                </small>
+                            </div>
                             <small>
                                 浏览：<span th:text="${post.viewCount}"></span>
                             </small>
@@ -44,14 +68,14 @@
                 <nav th:if="${posts.totalPages > 1}" class="mt-4">
                     <ul class="pagination justify-content-center">
                         <li class="page-item" th:classappend="${posts.first} ? 'disabled'">
-                            <a class="page-link" th:href="@{/post(page=${posts.number - 1})}">上一页</a>
+                            <a class="page-link" th:href="@{/post(page=${posts.number - 1}, categoryId=${categoryId})}">上一页</a>
                         </li>
                         <li class="page-item" th:each="i : ${#numbers.sequence(0, posts.totalPages - 1)}"
                             th:classappend="${i == posts.number} ? 'active'">
-                            <a class="page-link" th:href="@{/post(page=${i})}" th:text="${i + 1}"></a>
+                            <a class="page-link" th:href="@{/post(page=${i}, categoryId=${categoryId})}" th:text="${i + 1}"></a>
                         </li>
                         <li class="page-item" th:classappend="${posts.last} ? 'disabled'">
-                            <a class="page-link" th:href="@{/post(page=${posts.number + 1})}">下一页</a>
+                            <a class="page-link" th:href="@{/post(page=${posts.number + 1}, categoryId=${categoryId})}">下一页</a>
                         </li>
                     </ul>
                 </nav>
