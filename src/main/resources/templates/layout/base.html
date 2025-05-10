@@ -35,14 +35,14 @@
                     <li class="nav-item" sec:authorize="!isAuthenticated()">
                         <a class="nav-link" href="/user/register">注册</a>
                     </li>
-<!--                    下拉菜单，但下拉出现问题？-->
+<!--                    下拉菜单，由Bootstrap实现，这些类是固定的，class由Bootstrap的css进行修饰-->
                     <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" >
 <!--                            图像占位（暂时先写死）-->
 
                     <!--         th:src="${#authentication.principal.avatar}"  alt="用户头像"                        "-->
                             <img src="#"
-                                 th:src="@{/images/default-avatar.png}"
+                                 th:src="${#authentication.principal.avatar}"
                                  alt="用户头像"
                                  class="rounded-circle"
                                  width="30"

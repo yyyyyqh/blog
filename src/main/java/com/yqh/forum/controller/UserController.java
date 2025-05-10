@@ -78,6 +78,7 @@ public class UserController {
             
             // 处理头像上传
             if (avatarFile != null && !avatarFile.isEmpty()) {
+//                生成文件名逻辑
                 String fileName = currentUser.getId() + "_" + System.currentTimeMillis() + 
                                 avatarFile.getOriginalFilename().substring(avatarFile.getOriginalFilename().lastIndexOf("."));
                 

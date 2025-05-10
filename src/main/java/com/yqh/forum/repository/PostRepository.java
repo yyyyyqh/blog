@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByAuthor(User author, Pageable pageable);
@@ -20,4 +21,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     Page<Post> findByCategoryId(Long categoryId, Pageable pageable);
     Page<Post> findByTitleContainingOrContentContaining(String title, String content, Pageable pageable);
+
 } 

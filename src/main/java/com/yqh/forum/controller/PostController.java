@@ -98,6 +98,9 @@ public class PostController {
 //   显示帖子
     @GetMapping("/{id}")
     public String viewPost(@PathVariable Long id, Model model) {
+//        增加浏览次数
+        postService.incrementViewCount(id);
+
 //        通过postService先找到post
         PostDTO post = postService.findById(id);
 //        添加到model中的变量
