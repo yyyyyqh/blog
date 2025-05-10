@@ -68,7 +68,7 @@ CREATE TABLE comments (
 - 密码：admin
 
 ## 技术栈
-- 后端：Spring Boot 2.7.0
+- 后端：Spring Boot 2.7.6
 - 数据库：MySQL 8.0
 - 前端：Thymeleaf + Bootstrap 5
 - 安全：Spring Security 
