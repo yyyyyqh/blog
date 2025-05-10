@@ -35,8 +35,11 @@
                             </div>
                         </div>
                         <div class="card-text" th:text="${post.content}"></div>
-                        
-                        <div class="mt-3" sec:authorize="isAuthenticated() and #authentication.name == ${post.author.username}">
+
+<!--                        sec:authorize使用的是Spring Expression Language (SpEL) 表达式，不能穿插thymeleaf语法${post.author.username}-->
+<!--                        `post` 对象是在后端 Controller 中作为 Model Attribute 添加到 Thymeleaf 模板中的变量。它属于 Thymeleaf 的上下文，而不是 Spring Security 的默认 SpEL 上下文，
+尝试访问没有的属性就会产生报错，需要使用 SpEL 提供的访问 Thymeleaf 变量的特定方式，#vars对象-->
+                        <div class="mt-3" sec:authorize="isAuthenticated() and #authentication.name == #vars.post.author.username">
                             <a th:href="@{/post/{id}/edit(id=${post.id})}" class="btn btn-primary btn-sm">编辑</a>
                             <form th:action="@{/post/{id}/delete(id=${post.id})}" method="post" class="d-inline">
                                 <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('确定要删除这篇帖子吗？')">删除</button>

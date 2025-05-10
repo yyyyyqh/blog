@@ -1,5 +1,6 @@
 // 页面加载完成后执行
 document.addEventListener('DOMContentLoaded', function() {
+
     // 自动关闭警告消息
     const alerts = document.querySelectorAll('.alert');
     alerts.forEach(alert => {

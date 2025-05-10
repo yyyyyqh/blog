@@ -18,8 +18,28 @@ public class SecurityConfig {
         http
             .csrf().disable()
             .authorizeRequests()
-                .antMatchers("/", "/post", "/post/search", "/post/*", "/user/register", "/user/login", 
-                           "/css/**", "/js/**", "/images/**", "/uploads/**", "/_static/**", "/webjars/**").permitAll()
+                // 放行静态资源路径（优先级高）
+                .antMatchers(
+                        "/css/**",
+                        "/js/**",
+                        "/images/**",
+                        "/webjars/**",
+                        "/_static/**"
+                ).permitAll()
+                // 放行其他公开路径
+                .antMatchers(
+                        "/",
+                        "/post",
+                        "/post/search",
+                        "/post/*",
+                        "/user/register",
+                        "/user/login"
+                ).permitAll()
+//                放行的路径
+//                .antMatchers("/", "/post", "/post/search", "/post/*", "/user/register", "/user/login",
+//                           "/css/**", "/js/**", "/images/**", "/uploads/**", "/_static/**", "/webjars/**",
+//                        "https://cdn.bootcdn.net/**").permitAll()
+//                其他路径需要验证
                 .anyRequest().authenticated()
                 .and()
             .formLogin()
