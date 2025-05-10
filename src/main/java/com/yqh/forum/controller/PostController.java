@@ -1,12 +1,15 @@
 package com.yqh.forum.controller;
 
+import com.yqh.forum.dto.CommentDTO;
 import com.yqh.forum.dto.PostDTO;
 import com.yqh.forum.model.Post;
 import com.yqh.forum.service.CategoryService;
+import com.yqh.forum.service.CommentService;
 import com.yqh.forum.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,6 +30,9 @@ public class PostController {
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired // 注入 CommentService
+    private CommentService commentService;
 
     @GetMapping
     public String listPosts(
@@ -89,13 +95,25 @@ public class PostController {
         }
     }
 
+//   显示帖子
     @GetMapping("/{id}")
     public String viewPost(@PathVariable Long id, Model model) {
+//        通过postService先找到post
         PostDTO post = postService.findById(id);
+//        添加到model中的变量
         model.addAttribute("post", post);
+
+        //    我们先获取第一页评论，每页显示假设为 10 条
+        Pageable pageable = PageRequest.of(0, 10); // 获取第 0 页（即第一页），每页 10 条
+        Page<CommentDTO> commentPage = commentService.findByPostId(id, pageable);
+
+        model.addAttribute("comments", commentPage.getContent());
+
+
         return "post/view";
     }
 
+//
     @GetMapping("/{id}/edit")
     public String showEditForm(
             @PathVariable Long id,
@@ -114,6 +132,7 @@ public class PostController {
         return "post/edit";
     }
 
+//    编辑时
     @PostMapping("/{id}/edit")
     public String updatePost(
             @PathVariable Long id,
@@ -135,6 +154,7 @@ public class PostController {
         }
     }
 
+//    帖子删除操作
     @PostMapping("/{id}/delete")
     public String deletePost(
             @PathVariable Long id,

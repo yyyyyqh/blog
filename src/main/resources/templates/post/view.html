@@ -54,6 +54,8 @@
                         <h5 class="mb-0">评论</h5>
                     </div>
                     <div class="card-body">
+<!--                        登录之后-->
+<!--                        存在问题，无法提交评论-->
                         <div sec:authorize="isAuthenticated()">
                             <form th:action="@{/comment/create}" method="post">
                                 <input type="hidden" name="postId" th:value="${post.id}">
@@ -63,10 +65,12 @@
                                 <button type="submit" class="btn btn-primary">发表评论</button>
                             </form>
                         </div>
+<!--                        登录之前-->
                         <div sec:authorize="!isAuthenticated()" class="alert alert-info">
                             请<a th:href="@{/login}">登录</a>后发表评论
                         </div>
 
+<!--                        评论列表-->
                         <div class="mt-4">
                             <div th:each="comment : ${comments}" class="card mb-3">
                                 <div class="card-body">
@@ -75,7 +79,8 @@
                                             <strong th:text="${comment.author.username}"></strong>
                                             <small class="text-muted ms-2" th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}"></small>
                                         </div>
-                                        <div sec:authorize="isAuthenticated() and #authentication.name == ${comment.author.username}">
+<!--                                        这里产生了问题，报错同上，修改即可-->
+                                        <div sec:authorize="isAuthenticated() and #authentication.name == #vars.comment.author.username">
                                             <button class="btn btn-link btn-sm text-decoration-none" 
                                                     th:onclick="'editComment(' + ${comment.id} + ')'">编辑</button>
                                             <form th:action="@{/comment/{id}/delete(id=${comment.id})}" method="post" class="d-inline">

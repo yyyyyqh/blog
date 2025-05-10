@@ -17,6 +17,7 @@ public class CommentController {
     @Autowired
     private CommentService commentService;
 
+//    评论发布时的处理
     @PostMapping("/create")
     public String createComment(@ModelAttribute CommentDTO commentDTO,
                               RedirectAttributes redirectAttributes) {
@@ -26,6 +27,7 @@ public class CommentController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "评论发布失败：" + e.getMessage());
         }
+//    返回了一个重定向地址    在header的Location属性，重定向的位置
         return "redirect:/post/" + commentDTO.getPostId();
     }
 

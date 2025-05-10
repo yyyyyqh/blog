@@ -72,3 +72,7 @@ CREATE TABLE comments (
 - 数据库：MySQL 8.0
 - 前端：Thymeleaf + Bootstrap 5
 - 安全：Spring Security 
+
+# 数据
+
+可以由https://mockaroo.com/生成，或手动输入
