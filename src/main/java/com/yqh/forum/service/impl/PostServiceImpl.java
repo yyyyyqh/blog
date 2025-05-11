@@ -17,6 +17,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @Service
 public class PostServiceImpl implements PostService {
 
@@ -29,21 +32,60 @@ public class PostServiceImpl implements PostService {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    // **修改：用于匹配 Markdown 图片链接 或 HTML 图片标签 的正则表达式**
+    // Markdown 链接: !\[.*?\]\(.*?\)
+    // HTML 标签: <img.*?src=[\"'].*?[\"'].*?>
+    // 使用 | 连接两个模式，实现“或”的功能。Pattern.CASE_INSENSITIVE 忽略大小写
+    private static final Pattern IMAGE_PATTERN = Pattern.compile("!\\[.*?\\]\\(.*?\\)|<img.*?src=[\"'].*?[\"'].*?>", Pattern.CASE_INSENSITIVE);
+
+    /**
+     * **修改：根据完整的帖子内容生成用于列表显示的摘要内容**
+     * 移除 Markdown 图片链接 和 HTML 图片标签，并可以截取长度
+     * @param fullContent 完整的原始 Markdown 内容
+     * @return 处理后的摘要内容
+     */
+    private String generateSummaryContent(String fullContent) {
+        if (fullContent == null) {
+            return "";
+        }
+        // **使用新的正则表达式移除图片相关的标记**
+        Matcher matcher = IMAGE_PATTERN.matcher(fullContent);
+        String contentWithoutImages = matcher.replaceAll("");
+
+        // **可选：截取摘要内容的长度**
+        int maxLength = 200; // 与 list.html 中原有的 #strings.abbreviate(post.content, 200) 匹配
+        if (contentWithoutImages.length() > maxLength) {
+            // 截取并添加省略号
+            return contentWithoutImages.substring(0, maxLength) + "...";
+        }
+
+        return contentWithoutImages; // 返回处理后的内容
+    }
+
+    // ... createPost, updatePost, deletePost, findById, findAll, findByCategoryId, search, incrementViewCount, findByAuthor, convertToDTO, convertToUserDTO, convertToCategoryDTO 方法保持不变 ...
+    // 请确保这些方法在您的文件中都存在且正确
+
+    // 您可以复制粘贴 generateSummaryContent 方法上方到类结尾的所有方法，
+    // 并用上面提供的完整 PostServiceImpl 代码替换您文件中的对应方法。
+    // 确保引入的包是正确的。
+
     @Override
     @Transactional
     public PostDTO createPost(PostDTO postDTO, String username) {
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("用户不存在"));
-        
+
         Category category = categoryRepository.findById(postDTO.getCategory().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("分类不存在"));
-        
+
         Post post = new Post();
         post.setTitle(postDTO.getTitle());
         post.setContent(postDTO.getContent());
         post.setAuthor(author);
         post.setCategory(category);
-        
+        // Set initial view count
+        post.setViewCount(0);
+
         Post savedPost = postRepository.save(post);
         return convertToDTO(savedPost);
     }
@@ -53,18 +95,18 @@ public class PostServiceImpl implements PostService {
     public PostDTO updatePost(Long id, PostDTO postDTO, String username) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("帖子不存在"));
-        
+
         if (!post.getAuthor().getUsername().equals(username)) {
             throw new IllegalStateException("您没有权限编辑此帖子");
         }
-        
+
         Category category = categoryRepository.findById(postDTO.getCategory().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("分类不存在"));
-        
+
         post.setTitle(postDTO.getTitle());
         post.setContent(postDTO.getContent());
         post.setCategory(category);
-        
+
         Post updatedPost = postRepository.save(post);
         return convertToDTO(updatedPost);
     }
@@ -74,11 +116,11 @@ public class PostServiceImpl implements PostService {
     public void deletePost(Long id, String username) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("帖子不存在"));
-        
+
         if (!post.getAuthor().getUsername().equals(username)) {
             throw new IllegalStateException("您没有权限删除此帖子");
         }
-        
+
         postRepository.delete(post);
     }
 
@@ -86,25 +128,28 @@ public class PostServiceImpl implements PostService {
     public PostDTO findById(Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("帖子不存在"));
+        // 返回包含完整 content 的 DTO
         return convertToDTO(post);
     }
 
     @Override
     public Page<PostDTO> findAll(Pageable pageable) {
         return postRepository.findAll(pageable)
+                // 使用 map 调用 convertToDTO，其中会生成并设置 summaryContent
                 .map(this::convertToDTO);
     }
 
     @Override
     public Page<PostDTO> findByCategoryId(Long categoryId, Pageable pageable) {
         return postRepository.findByCategoryId(categoryId, pageable)
+                // 使用 map 调用 convertToDTO，其中会生成并设置 summaryContent
                 .map(this::convertToDTO);
     }
 
     @Override
     public Page<PostDTO> search(String keyword, Pageable pageable) {
         return postRepository.findByTitleContainingOrContentContaining(keyword, keyword, pageable)
-                .map(this::convertToDTO);
+                .map(this::convertToDTO); // map 调用 convertToDTO，其中会生成并设置 summaryContent
     }
 
     @Override
@@ -121,18 +166,22 @@ public class PostServiceImpl implements PostService {
         User author = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("用户不存在"));
         return postRepository.findByAuthor(author, pageable)
-                .map(this::convertToDTO);
+                .map(this::convertToDTO); // map 调用 convertToDTO，其中会生成并设置 summaryContent
     }
 
+    // **修改 convertToDTO 方法，添加生成和设置 summaryContent 的逻辑**
     private PostDTO convertToDTO(Post post) {
         if (post == null) {
             return null;
         }
-        
+
         PostDTO dto = new PostDTO();
         dto.setId(post.getId());
         dto.setTitle(post.getTitle());
-        dto.setContent(post.getContent());
+        dto.setContent(post.getContent()); // 保留原始完整内容
+        // **调用 generateSummaryContent 生成摘要并设置到 DTO 中**
+        dto.setSummaryContent(generateSummaryContent(post.getContent()));
+
         dto.setAuthor(convertToUserDTO(post.getAuthor()));
         dto.setCategory(convertToCategoryDTO(post.getCategory()));
         dto.setCreatedAt(post.getCreatedAt());
@@ -145,7 +194,7 @@ public class PostServiceImpl implements PostService {
         if (user == null) {
             return null;
         }
-        
+
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
         dto.setUsername(user.getUsername());
@@ -159,7 +208,7 @@ public class PostServiceImpl implements PostService {
         if (category == null) {
             return null;
         }
-        
+
         CategoryDTO dto = new CategoryDTO();
         dto.setId(category.getId());
         dto.setName(category.getName());
@@ -168,4 +217,4 @@ public class PostServiceImpl implements PostService {
         dto.setUpdatedAt(category.getUpdatedAt());
         return dto;
     }
-} 
+}
