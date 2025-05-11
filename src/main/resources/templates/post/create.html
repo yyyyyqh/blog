@@ -2,53 +2,424 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="layout/base :: head">
     <title>发布帖子</title>
+
+
 </head>
 <body>
-    <div th:replace="layout/base :: nav"></div>
+<div th:replace="layout/base :: nav"></div>
 
-    <div class="container mt-4">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="mb-0">发布帖子</h4>
-                    </div>
-                    <div class="card-body">
-                        <form th:action="@{/post/create}" th:object="${post}" method="post">
-                            <div class="mb-3">
-                                <label for="title" class="form-label">标题</label>
-                                <input type="text" class="form-control" id="title" th:field="*{title}" required>
-                                <div class="text-danger" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">发布帖子</h4>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/post/create}" th:object="${post}" method="post">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">标题</label>
+                            <input type="text" class="form-control" id="title" th:field="*{title}" required>
+                            <div class="text-danger" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="category" class="form-label">分类</label>
+                            <select class="form-select" id="category" th:field="*{category.id}" required>
+                                <option value="">请选择分类</option>
+                                <option th:each="category : ${categories}"
+                                        th:value="${category.id}"
+                                        th:text="${category.name}"></option>
+                            </select>
+                            <div class="text-danger" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="content" class="form-label">内容</label>
+<!--                            required-->
+<!--                            使用markdown编辑器时，required属性会影响提交，需要取消，验证交由后端处理-->
+                            <textarea class="form-control" id="content" th:field="*{content}" rows="10" ></textarea>
+                            <div class="text-danger" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
+<!--                            方案二-->
+                            <button type="button" id="uploadImageButton" class="btn btn-secondary btn-sm mt-2">上传图片</button>
+                            <input type="file" id="imageFileInput" style="display: none;" accept="image/*">
+
+                            <div id="imageSizeInputBlock" class="mt-2" style="display: none;">
+                                <label for="imageWidthInput" class="form-label me-2">图片宽度 (px):</label>
+                                <input type="number" id="imageWidthInput" class="form-control form-control-sm d-inline-block" style="width: 80px;" value="600" min="1">
                             </div>
-                            
-                            <div class="mb-3">
-                                <label for="category" class="form-label">分类</label>
-                                <select class="form-select" id="category" th:field="*{category.id}" required>
-                                    <option value="">请选择分类</option>
-                                    <option th:each="category : ${categories}"
-                                            th:value="${category.id}"
-                                            th:text="${category.name}"></option>
-                                </select>
-                                <div class="text-danger" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></div>
+
+                            <div id="uploadedImagesContainer" class="mt-2">
                             </div>
-                            
-                            <div class="mb-3">
-                                <label for="content" class="form-label">内容</label>
-                                <textarea class="form-control" id="content" th:field="*{content}" rows="10" required></textarea>
-                                <div class="text-danger" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
-                            </div>
-                            
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary">发布</button>
-                                <a th:href="@{/post}" class="btn btn-secondary">取消</a>
-                            </div>
-                        </form>
-                    </div>
+
+<!--                            方案一-->
+<!--                            <button type="button" id="uploadImageButton" class="btn btn-secondary btn-sm mt-2">上传图片</button>-->
+<!--                            <input type="file" id="imageFileInput" style="display: none;" accept="image/*"> <span id="uploadStatus" class="ms-2"></span>-->
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">发布</button>
+                            <a th:href="@{/post}" class="btn btn-secondary">取消</a>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <div th:replace="layout/base :: footer"></div>
+<div th:replace="layout/base :: footer"></div>
+
+
+
+
+<script>
+    const easyMDE = new EasyMDE({
+        element: document.getElementById("content"), // 指定要转换的 textarea 元素的 ID
+
+        spellChecker: false, // 关闭拼写检查 (如果您想关闭的话)
+
+        // **只包含您需要配置的 imageUploadFunction 选项**
+        imageUploadFunction: function(file, onSuccess, onError) {
+            // 您的图片上传逻辑代码
+            var formData = new FormData();
+            formData.append('image', file);
+
+            fetch('/upload/image', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    // ... 处理响应 ...
+                    if (!response.ok) {
+                        throw new Error('图片上传失败，状态码: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && data.url) {
+                        onSuccess(data.url);
+                    } else {
+                        onError('图片上传接口返回的数据格式不正确');
+                    }
+                })
+                .catch(error => {
+                    console.error('上传错误:', error);
+                    onError('图片上传失败: ' + error.message);
+                });
+        }
+        // 如果您还需要其他配置，可以在这里继续添加，例如：
+        // minHeight: "300px",
+        // toolbar: ["bold", "italic", "image", "|", "preview"]
+    });
+</script>
+
+<!--上传图片方案2-->
+<script>
+    // 等待 DOM 加载完成
+    document.addEventListener("DOMContentLoaded", function() {
+        // 获取页面元素
+        const uploadButton = document.getElementById('uploadImageButton'); // 上传按钮
+        const fileInput = document.getElementById('imageFileInput');       // 隐藏的文件输入框
+        const contentTextarea = document.getElementById('content');       // 您的内容文本框
+        const uploadedImagesContainer = document.getElementById('uploadedImagesContainer'); // 显示上传信息的容器
+        const imageSizeInputBlock = document.getElementById('imageSizeInputBlock'); // 图片大小输入区域
+        const imageWidthInput = document.getElementById('imageWidthInput');     // 宽度输入框
+
+        // 用于存储用户选择的图片文件，以便在用户确定宽度后上传
+        let selectedFile = null;
+        // 用于存储原始图片尺寸，以便计算预设宽度
+        let originalImageWidth = 0;
+        let originalImageHeight = 0;
+
+        // 确保找到了所有需要的元素
+        if (uploadButton && fileInput && contentTextarea && uploadedImagesContainer && imageSizeInputBlock && imageWidthInput) {
+
+            // **上传图片按钮的点击事件监听器 (双重功能)**
+            uploadButton.addEventListener('click', function() {
+                // 检查图片大小输入区域是否显示
+                if (imageSizeInputBlock.style.display === 'none') {
+                    // **如果大小输入区域隐藏，说明用户点击按钮是为了选择文件**
+                    fileInput.click(); // 触发隐藏的文件输入框点击事件，打开文件选择对话框
+                } else {
+                    // **如果大小输入区域显示，说明用户已经选择了文件并设置了宽度，点击按钮是为了触发上传**
+                    if (selectedFile) {
+                        // 获取用户在输入框中设置的宽度值
+                        const desiredWidth = parseInt(imageWidthInput.value, 10);
+
+                        // 验证宽度输入是否有效 (是数字且大于 0)
+                        if (!isNaN(desiredWidth) && desiredWidth > 0) {
+                            // 触发文件上传，并传递选中的文件和用户指定的宽度
+                            triggerUpload(selectedFile, desiredWidth);
+                        } else {
+                            // 用户输入的宽度无效
+                            console.warn("无效的宽度输入，无法上传图片。请检查输入值。");
+                            // 可选：向用户显示错误提示
+                        }
+                    } else {
+                        // 理论上不应该发生，除非用户在选择文件后，文件变量被意外清空
+                        console.warn("没有选中的文件可供上传。");
+                        // 可选：向用户显示提示
+                    }
+                }
+            });
+
+            // **文件输入框的 change 事件监听器 (选择文件后执行)**
+            fileInput.addEventListener('change', function() {
+                const file = fileInput.files[0]; // 获取用户选择的文件
+
+                if (file) {
+                    selectedFile = file; // **存储选中的文件**
+
+                    // **使用 FileReader 和 Image 对象读取图片原始尺寸**
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = new Image();
+                        img.onload = function() {
+                            // 获取图片的原始自然宽度和高度
+                            originalImageWidth = img.naturalWidth;
+                            originalImageHeight = img.naturalHeight;
+                            console.log("图片的原始尺寸:", originalImageWidth, "x", originalImageHeight);
+
+                            // **文件选择后，显示图片大小输入区域**
+                            imageSizeInputBlock.style.display = 'block';
+                            // **计算并预设默认宽度：取原始宽度和预设最大值 (如 600) 中的较小值**
+                            imageWidthInput.value = Math.min(originalImageWidth, 600);
+                            imageWidthInput.min = 1; // 确保最小宽度为 1
+
+                            // **用户现在可以在输入框中修改宽度，然后再次点击“上传图片”按钮来触发上传**
+                            // 此时不立即上传
+                        };
+                        // 将文件读取为 Data URL
+                        img.src = e.target.result;
+                    };
+                    // 将文件读取为 Data URL
+                    reader.readAsDataURL(file);
+
+                } else {
+                    // 如果用户取消了文件选择对话框
+                    selectedFile = null; // 清空选中的文件
+                    imageSizeInputBlock.style.display = 'none'; // 隐藏大小输入区域
+                    fileInput.value = ''; // 清空文件输入框的值，以便下次选择同一个文件
+                }
+            });
+
+
+            // **函数：执行实际的文件上传逻辑**
+            // 接收文件对象和用户指定的宽度作为参数
+            function triggerUpload(file, width) {
+                // ... 上传过程中的状态提示和按钮禁用 (与之前相同) ...
+                // if (uploadStatus) uploadStatus.textContent = '上传中...';
+                uploadButton.disabled = true; // 上传过程中禁用按钮
+
+                const formData = new FormData();
+                formData.append('image', file); // 'image' 与后端 @RequestParam("image") 同名
+
+                fetch('/upload/image', { method: 'POST', body: formData })
+                    .then(response => {
+                        // ... 错误处理 ...
+                        if (!response.ok) {
+                            // 读取后端返回的错误信息（假设是纯文本）
+                            return response.text().then(text => { throw new Error('图片上传失败: ' + text); });
+                        }
+                        // 假设后端返回的是 JSON，格式如 { "url": "/uploads/post-images/unique-filename.png" }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data && data.url) {
+                            const imageUrl = data.url; // 获取后端返回的图片 Web URL
+
+                            // **根据用户指定的宽度和后端返回的 URL 生成 HTML <img> 标签字符串**
+                            // 只设置 width 属性，浏览器通常会按比例缩放，保持纵横比
+                            const htmlImgTag = `<img src="${imageUrl}" width="${width}">`;
+                            console.log("生成 HTML img 标签，用于复制:", htmlImgTag);
+
+                            // **显示图片 Web URL 和“复制链接”按钮**
+                            // 传递图片 URL (用于显示) 和生成的 HTML img 标签字符串 (用于复制)
+                            addUploadedImageInfo(imageUrl, htmlImgTag);
+
+                            // 更新状态提示 (如果保留了状态 span)
+                            // if (uploadStatus) uploadStatus.textContent = '上传成功！';
+
+                        } else {
+                            throw new Error('服务器返回数据格式不正确'); // 后端返回格式不正确
+                        }
+                    })
+                    .catch(error => {
+                        // ... 处理上传失败的错误 ...
+                        console.error('上传错误:', error);
+                        // if (uploadStatus) uploadStatus.textContent = '上传失败: ' + error.message;
+                    })
+                    .finally(() => {
+                        // **上传完成后，恢复按钮状态并隐藏大小输入区域，清空选中的文件**
+                        uploadButton.disabled = false; // 重新启用按钮
+                        imageSizeInputBlock.style.display = 'none'; // 隐藏大小输入区域
+                        selectedFile = null; // 清空选中的文件
+                        fileInput.value = ''; // 清空文件输入框的值，以便下次选择文件
+
+                        // 您可以在这里更新按钮文本为初始状态，例如 “上传图片”
+                        // uploadButton.textContent = '上传图片'; // Example
+                    });
+            } // triggerUpload 函数结束
+
+
+            // **函数：动态添加上传图片信息和复制按钮**
+            // 接收图片 URL (用于显示) 和要复制的链接字符串 (HTML img 标签) 作为参数
+            function addUploadedImageInfo(imageUrl, linkToCopy) {
+                // 创建一个 div 用于包裹信息
+                const imageEntryDiv = document.createElement('div');
+                imageEntryDiv.classList.add('mb-2');
+
+                // 创建一个 span 显示图片 Web URL (或者文件名)
+                const urlSpan = document.createElement('span');
+                // 为了简洁，这里只显示文件名，完整 URL 作为 title 显示在 tooltip 中
+                const filename = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
+                urlSpan.textContent = filename;
+                urlSpan.title = imageUrl; // 鼠标悬停时显示完整 URL
+                urlSpan.classList.add('me-2', 'd-inline-block', 'text-truncate'); // 样式控制显示
+                urlSpan.style.maxWidth = '250px'; // 控制最大显示宽度
+
+                // 创建一个复制按钮
+                const copyButton = document.createElement('button');
+                copyButton.type = 'button';
+                copyButton.classList.add('btn', 'btn-outline-primary', 'btn-sm');
+                copyButton.textContent = '复制链接'; // 按钮文本
+
+                // **为复制按钮添加点击事件监听器**
+                copyButton.addEventListener('click', function() {
+                    // **复制 linkToCopy (HTML img 标签字符串) 到剪贴板**
+                    navigator.clipboard.writeText(linkToCopy)
+                        .then(() => {
+                            console.log('HTML img 标签已复制到剪贴板:', linkToCopy);
+                            // 复制成功后的视觉反馈
+                            copyButton.textContent = '已复制！';
+                            copyButton.classList.remove('btn-outline-primary');
+                            copyButton.classList.add('btn-success');
+
+                            // 短暂延迟后恢复按钮文本和颜色
+                            setTimeout(() => {
+                                copyButton.textContent = '复制链接';
+                                copyButton.classList.remove('btn-success');
+                                copyButton.classList.add('btn-outline-primary');
+                            }, 2000);
+
+                        })
+                        .catch(err => {
+                            // **复制失败的处理**
+                            console.error('复制到剪贴板失败:', err);
+                            copyButton.textContent = '复制失败！';
+                            copyButton.classList.remove('btn-outline-primary');
+                            copyButton.classList.add('btn-danger');
+                            // 可选：显示用户友好的错误提示
+                        });
+                });
+
+                // **将创建的元素添加到容器中**
+                imageEntryDiv.appendChild(urlSpan);
+                imageEntryDiv.appendChild(copyButton);
+
+                uploadedImagesContainer.appendChild(imageEntryDiv);
+            }
+
+
+        } else {
+            console.error("未找到上传图片所需的 HTML 元素！");
+        }
+    });
+</script>
+
+<!--上传图片-->
+<!--<script>-->
+<!--    // 等待 DOM 加载完成-->
+<!--    document.addEventListener("DOMContentLoaded", function() {-->
+<!--        // 获取页面元素-->
+<!--        const uploadButton = document.getElementById('uploadImageButton'); // 上传按钮-->
+<!--        const fileInput = document.getElementById('imageFileInput');       // 隐藏的文件输入框-->
+<!--        const contentTextarea = document.getElementById('content');       // 您的内容文本框-->
+<!--        const uploadStatus = document.getElementById('uploadStatus');       // 显示状态的 span (如果添加了)-->
+
+<!--        // 确保找到了所有需要的元素-->
+<!--        if (uploadButton && fileInput && contentTextarea) {-->
+
+<!--            // **监听上传按钮的点击事件**-->
+<!--            // 当点击上传按钮时，触发隐藏的文件输入框的点击事件，弹出文件选择对话框-->
+<!--            uploadButton.addEventListener('click', function() {-->
+<!--                fileInput.click(); // 触发文件输入框的点击-->
+<!--            });-->
+
+<!--            // **监听文件输入框的文件选择事件**-->
+<!--            // 当用户选择了文件后，这个事件会被触发-->
+<!--            fileInput.addEventListener('change', function() {-->
+<!--                const file = fileInput.files[0]; // 获取用户选择的第一个文件-->
+
+<!--                if (file) {-->
+<!--                    // 如果用户选择了文件-->
+<!--                    if (uploadStatus) uploadStatus.textContent = '上传中...'; // 更新状态提示-->
+<!--                    uploadButton.disabled = true; // 上传过程中禁用按钮-->
+
+<!--                    // **使用 FormData 构建要发送的数据 (包含文件)**-->
+<!--                    const formData = new FormData();-->
+<!--                    // **这里的 'image' 需要与您后端 @RequestParam("image") 的名字一致**-->
+<!--                    formData.append('image', file);-->
+
+<!--                    // **使用 Fetch API 发送 POST 请求到后端上传接口**-->
+<!--                    fetch('/upload/image', { // **这是您后端图片上传接口的 URL**-->
+<!--                        method: 'POST',-->
+<!--                        body: formData // FormData 会自动设置 Content-Type 为 multipart/form-data-->
+<!--                    })-->
+<!--                        .then(response => {-->
+<!--                            if (!response.ok) {-->
+<!--                                // 如果响应状态码不是 2xx，读取响应体作为错误信息抛出-->
+<!--                                return response.text().then(text => { throw new Error('图片上传失败: ' + text); });-->
+<!--                            }-->
+<!--                            // 假设后端返回的是 JSON，格式如 { "url": "/uploads/post-images/unique-filename.png" }-->
+<!--                            return response.json();-->
+<!--                        })-->
+<!--                        .then(data => {-->
+<!--                            // 检查后端返回的数据格式是否正确-->
+<!--                            if (data && data.url) {-->
+<!--                                // 获取图片在 Web 上的 URL-->
+<!--                                const imageUrl = data.url;-->
+<!--                                // 构建 Markdown 图片语法字符串-->
+<!--                                const markdownImage = `![图片描述](${imageUrl})`; // "图片描述" 您可以根据需要修改或留空-->
+
+<!--                                // **将 Markdown 图片语法插入到文本框中**-->
+<!--                                // 获取当前光标位置和选中的文本范围-->
+<!--                                const start = contentTextarea.selectionStart;-->
+<!--                                const end = contentTextarea.selectionEnd;-->
+<!--                                const text = contentTextarea.value;-->
+
+<!--                                // 在光标位置插入新的文本-->
+<!--                                contentTextarea.value = text.substring(0, start) + markdownImage + text.substring(end);-->
+
+<!--                                // 将光标移动到插入的 Markdown 语法之后-->
+<!--                                contentTextarea.selectionStart = contentTextarea.selectionEnd = start + markdownImage.length;-->
+
+<!--                                // 可选：插入后将焦点设置回文本框-->
+<!--                                contentTextarea.focus();-->
+
+<!--                                if (uploadStatus) uploadStatus.textContent = '上传成功！'; // 更新状态-->
+<!--                            } else {-->
+<!--                                throw new Error('服务器返回数据格式不正确'); // 后端返回格式不正确-->
+<!--                            }-->
+<!--                        })-->
+<!--                        .catch(error => {-->
+<!--                            // 处理上传请求或响应中的错误-->
+<!--                            console.error('上传错误:', error); // 打印错误到控制台-->
+<!--                            if (uploadStatus) uploadStatus.textContent = '上传失败: ' + error.message; // 更新状态-->
+<!--                        })-->
+<!--                        .finally(() => {-->
+<!--                            // 无论上传成功或失败，都执行这里的代码-->
+<!--                            uploadButton.disabled = false; // 重新启用按钮-->
+<!--                            fileInput.value = ''; // 清空文件输入框的值，这样可以选择同一个文件再次上传-->
+<!--                        });-->
+<!--                }-->
+<!--            });-->
+<!--        } else {-->
+<!--            console.error("未找到上传图片所需的 HTML 元素！"); // 如果按钮、文件输入框或文本框 ID 不对-->
+<!--        }-->
+<!--    });-->
+<!--</script>-->
+
 </body>
-</html> 
+</html>

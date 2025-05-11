@@ -12,6 +12,10 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${app.avatar-upload-dir}")
     private String avatarUploadDir;
 
+    // **注入帖子图片上传目录**
+    @Value("${app.post-image-upload-dir}")
+    private String postImageUploadDir;
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // **配置资源处理器，将 Web URL 路径映射到外部文件目录**
@@ -25,6 +29,10 @@ public class WebConfig implements WebMvcConfigurer {
 
         registry.addResourceHandler("/uploads/avatars/**") // Web URL 路径模式
                 .addResourceLocations("file:" + avatarUploadDir + "/"); // 资源实际存放的文件系统目录
+
+        // **新增：帖子图片资源处理器**
+        registry.addResourceHandler("/uploads/post-images/**") // Web URL 路径模式
+                .addResourceLocations("file:" + postImageUploadDir + "/"); // 资源实际存放的文件系统目录
 
 
         // 如果您在 src/main/resources/static 等默认位置还有其他静态资源，
