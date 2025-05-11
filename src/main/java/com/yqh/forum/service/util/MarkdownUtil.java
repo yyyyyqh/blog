@@ -24,6 +24,10 @@ public class MarkdownUtil {
         // 如果您添加了表格、删除线等扩展依赖，可以在这里启用它们
         // options.set(Parser.EXTENSIONS, Arrays.asList(TablesExtension.create(), StrikethroughExtension.create()));
 
+        // **新增配置：将 Markdown 中的软换行转换为 HTML 的 <br> 标签**
+        // Flexmark 默认的 HtmlRenderer.SOFT_BREAK 是 "\n"，这里我们将其改为 "<br>\n"
+        options.set(HtmlRenderer.SOFT_BREAK, "<br>\n");
+
         PARSER = Parser.builder(options).build();
         RENDERER = HtmlRenderer.builder(options).build();
     }
