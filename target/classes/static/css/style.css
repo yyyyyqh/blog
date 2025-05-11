@@ -130,4 +130,13 @@ body {
     .list-group-item {
         padding: 1rem;
     }
-} 
+}
+
+
+/* 让帖子内容区域内的图片具有响应性，不超出容器范围 */
+.card-text img {
+    max-width: 100%; /* 确保图片的最大宽度不超过其父容器的宽度 */
+    height: auto;      /* 自动调整高度以保持纵横比 */
+    /* 可选：包含内边距和边框在元素的总尺寸内 */
+    box-sizing: border-box;
+}

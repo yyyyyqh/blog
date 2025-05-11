@@ -15,4 +15,5 @@ public interface PostService {
     Page<PostDTO> findByCategoryId(Long categoryId, Pageable pageable);
     Page<PostDTO> search(String keyword, Pageable pageable);
     void incrementViewCount(Long id);
+
 } 

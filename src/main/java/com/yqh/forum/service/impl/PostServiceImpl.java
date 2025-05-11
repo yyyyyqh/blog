@@ -163,8 +163,10 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Page<PostDTO> findByAuthor(Long userId, Pageable pageable) {
+        // 根据用户 ID 查找用户实体
         User author = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("用户不存在"));
+        // 调用 Repository 方法按作者查找帖子，并使用 convertToDTO 转换 (包含摘要生成)
         return postRepository.findByAuthor(author, pageable)
                 .map(this::convertToDTO); // map 调用 convertToDTO，其中会生成并设置 summaryContent
     }

@@ -1,3 +1,4 @@
+<!--我的帖子和所有帖子共用-->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="layout/base :: head">
@@ -9,7 +10,7 @@
 <div class="container mt-4">
     <div class="row mb-4">
         <div class="col">
-            <h2>帖子列表</h2>
+            <h2 th:text="${isMyPostsView} ? '我的帖子列表' : '所有帖子列表'">帖子列表</h2>
         </div>
         <div class="col-auto">
             <form th:action="@{/post/search}" method="get" class="d-flex">
@@ -20,13 +21,13 @@
     </div>
 
     <div class="row">
-        <div class="col-md-3">
+        <div class="col-md-3" th:if="${!isMyPostsView}">
             <div class="card mb-4">
                 <div class="card-header">
                     <h5 class="mb-0">分类</h5>
                 </div>
                 <div class="list-group list-group-flush">
-                    <a th:href="@{/post}" class="list-group-item list-group-item-action" th:classappend="${categoryId == null} ? 'active'">
+                    <a th:href="@{/post}" class="list-group-item list-group-item-action" th:classappend="${categoryId == null && !isMyPostsView} ? 'active'">
                         全部
                     </a>
                     <a th:each="category : ${categories}"
@@ -39,7 +40,7 @@
             </div>
         </div>
 
-        <div class="col-md-9">
+        <div th:classappend="${isMyPostsView} ? 'col-md-12' : 'col-md-9'">
             <div class="list-group">
                 <div th:each="post : ${posts.content}" class="list-group-item list-group-item-action">
                     <div class="d-flex w-100 justify-content-between">
@@ -68,14 +69,23 @@
             <nav th:if="${posts.totalPages > 1}" class="mt-4">
                 <ul class="pagination justify-content-center">
                     <li class="page-item" th:classappend="${posts.first} ? 'disabled'">
-                        <a class="page-link" th:href="@{/post(page=${posts.number - 1}, categoryId=${categoryId})}">上一页</a>
+                        <a class="page-link"
+                           th:href="${isMyPostsView} ? @{/post/my(page=${posts.number - 1})} : @{/post(page=${posts.number - 1}, categoryId=${categoryId})}">
+                            上一页
+                        </a>
                     </li>
                     <li class="page-item" th:each="i : ${#numbers.sequence(0, posts.totalPages - 1)}"
                         th:classappend="${i == posts.number} ? 'active'">
-                        <a class="page-link" th:href="@{/post(page=${i}, categoryId=${categoryId})}" th:text="${i + 1}"></a>
+                        <a class="page-link"
+                           th:href="${isMyPostsView} ? @{/post/my(page=${i})} : @{/post(page=${i}, categoryId=${categoryId})}"
+                           th:text="${i + 1}">
+                        </a>
                     </li>
                     <li class="page-item" th:classappend="${posts.last} ? 'disabled'">
-                        <a class="page-link" th:href="@{/post(page=${posts.number + 1}, categoryId=${categoryId})}">下一页</a>
+                        <a class="page-link"
+                           th:href="${isMyPostsView} ? @{/post/my(page=${posts.number + 1})} : @{/post(page=${posts.number + 1}, categoryId=${categoryId})}">
+                            下一页
+                        </a>
                     </li>
                 </ul>
             </nav>
@@ -86,6 +96,196 @@
 <div th:replace="layout/base :: footer"></div>
 </body>
 </html>
+
+
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">-->
+<!--<head th:replace="layout/base :: head">-->
+<!--    <title>帖子列表</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div th:replace="layout/base :: nav"></div>-->
+
+<!--<div class="container mt-4">-->
+<!--    <div class="row mb-4">-->
+<!--        <div class="col">-->
+<!--            <h2 th:text="${isMyPostsView} ? '我的帖子列表' : '所有帖子列表'">帖子列表</h2>-->
+<!--        </div>-->
+<!--        <div class="col-auto">-->
+<!--            <form th:action="@{/post/search}" method="get" class="d-flex">-->
+<!--                <input type="text" name="keyword" class="form-control me-2" placeholder="搜索帖子...">-->
+<!--                <button type="submit" class="btn btn-outline-primary">搜索</button>-->
+<!--            </form>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    <div class="row">-->
+<!--        <div class="col-md-3">-->
+<!--            <div class="card mb-4">-->
+<!--                <div class="card-header">-->
+<!--                    <h5 class="mb-0">分类</h5>-->
+<!--                </div>-->
+<!--                <div class="list-group list-group-flush">-->
+<!--                    <a th:href="@{/post}" class="list-group-item list-group-item-action" th:classappend="${categoryId == null && !isMyPostsView} ? 'active'">-->
+<!--                        全部-->
+<!--                    </a>-->
+<!--                    <a th:each="category : ${categories}"-->
+<!--                       th:href="@{/post(categoryId=${category.id})}"-->
+<!--                       th:text="${category.name}"-->
+<!--                       class="list-group-item list-group-item-action"-->
+<!--                       th:classappend="${categoryId == category.id} ? 'active'">-->
+<!--                    </a>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        <div class="col-md-9">-->
+<!--            <div class="list-group">-->
+<!--                <div th:each="post : ${posts.content}" class="list-group-item list-group-item-action">-->
+<!--                    <div class="d-flex w-100 justify-content-between">-->
+<!--                        <h5 class="mb-1">-->
+<!--                            <a th:href="@{/post/{id}(id=${post.id})}" th:text="${post.title}" class="text-decoration-none"></a>-->
+<!--                        </h5>-->
+<!--                        <small th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></small>-->
+<!--                    </div>-->
+<!--                    <p class="mb-1" th:text="${post.summaryContent}"></p>-->
+<!--                    <div class="d-flex justify-content-between align-items-center">-->
+<!--                        <div>-->
+<!--                            <small>-->
+<!--                                作者：<span th:text="${post.author.username}"></span>-->
+<!--                            </small>-->
+<!--                            <small class="ms-3">-->
+<!--                                分类：<span th:text="${post.category.name}"></span>-->
+<!--                            </small>-->
+<!--                        </div>-->
+<!--                        <small>-->
+<!--                            浏览：<span th:text="${post.viewCount}"></span>-->
+<!--                        </small>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            <nav th:if="${posts.totalPages > 1}" class="mt-4">-->
+<!--                <ul class="pagination justify-content-center">-->
+<!--                    <li class="page-item" th:classappend="${posts.first} ? 'disabled'">-->
+<!--                        <a class="page-link"-->
+<!--                           th:href="${isMyPostsView} ? @{/post/my(page=${posts.number - 1})} : @{/post(page=${posts.number - 1}, categoryId=${categoryId})}">-->
+<!--                            上一页-->
+<!--                        </a>-->
+<!--                    </li>-->
+<!--                    <li class="page-item" th:each="i : ${#numbers.sequence(0, posts.totalPages - 1)}"-->
+<!--                        th:classappend="${i == posts.number} ? 'active'">-->
+<!--                        <a class="page-link"-->
+<!--                           th:href="${isMyPostsView} ? @{/post/my(page=${i})} : @{/post(page=${i}, categoryId=${categoryId})}"-->
+<!--                           th:text="${i + 1}">-->
+<!--                        </a>-->
+<!--                    </li>-->
+<!--                    <li class="page-item" th:classappend="${posts.last} ? 'disabled'">-->
+<!--                        <a class="page-link"-->
+<!--                           th:href="${isMyPostsView} ? @{/post/my(page=${posts.number + 1})} : @{/post(page=${posts.number + 1}, categoryId=${categoryId})}">-->
+<!--                            下一页-->
+<!--                        </a>-->
+<!--                    </li>-->
+<!--                </ul>-->
+<!--            </nav>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--<div th:replace="layout/base :: footer"></div>-->
+<!--</body>-->
+<!--</html>-->
+
+
+<!--实现我的帖子之前-->
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">-->
+<!--<head th:replace="layout/base :: head">-->
+<!--    <title>帖子列表</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div th:replace="layout/base :: nav"></div>-->
+
+<!--<div class="container mt-4">-->
+<!--    <div class="row mb-4">-->
+<!--        <div class="col">-->
+<!--            <h2>帖子列表</h2>-->
+<!--        </div>-->
+<!--        <div class="col-auto">-->
+<!--            <form th:action="@{/post/search}" method="get" class="d-flex">-->
+<!--                <input type="text" name="keyword" class="form-control me-2" placeholder="搜索帖子...">-->
+<!--                <button type="submit" class="btn btn-outline-primary">搜索</button>-->
+<!--            </form>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    <div class="row">-->
+<!--        <div class="col-md-3">-->
+<!--            <div class="card mb-4">-->
+<!--                <div class="card-header">-->
+<!--                    <h5 class="mb-0">分类</h5>-->
+<!--                </div>-->
+<!--                <div class="list-group list-group-flush">-->
+<!--                    <a th:href="@{/post}" class="list-group-item list-group-item-action" th:classappend="${categoryId == null} ? 'active'">-->
+<!--                        全部-->
+<!--                    </a>-->
+<!--                    <a th:each="category : ${categories}"-->
+<!--                       th:href="@{/post(categoryId=${category.id})}"-->
+<!--                       th:text="${category.name}"-->
+<!--                       class="list-group-item list-group-item-action"-->
+<!--                       th:classappend="${categoryId == category.id} ? 'active'">-->
+<!--                    </a>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        <div class="col-md-9">-->
+<!--            <div class="list-group">-->
+<!--                <div th:each="post : ${posts.content}" class="list-group-item list-group-item-action">-->
+<!--                    <div class="d-flex w-100 justify-content-between">-->
+<!--                        <h5 class="mb-1">-->
+<!--                            <a th:href="@{/post/{id}(id=${post.id})}" th:text="${post.title}" class="text-decoration-none"></a>-->
+<!--                        </h5>-->
+<!--                        <small th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></small>-->
+<!--                    </div>-->
+<!--                    <p class="mb-1" th:text="${post.summaryContent}"></p>-->
+<!--                    <div class="d-flex justify-content-between align-items-center">-->
+<!--                        <div>-->
+<!--                            <small>-->
+<!--                                作者：<span th:text="${post.author.username}"></span>-->
+<!--                            </small>-->
+<!--                            <small class="ms-3">-->
+<!--                                分类：<span th:text="${post.category.name}"></span>-->
+<!--                            </small>-->
+<!--                        </div>-->
+<!--                        <small>-->
+<!--                            浏览：<span th:text="${post.viewCount}"></span>-->
+<!--                        </small>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            <nav th:if="${posts.totalPages > 1}" class="mt-4">-->
+<!--                <ul class="pagination justify-content-center">-->
+<!--                    <li class="page-item" th:classappend="${posts.first} ? 'disabled'">-->
+<!--                        <a class="page-link" th:href="@{/post(page=${posts.number - 1}, categoryId=${categoryId})}">上一页</a>-->
+<!--                    </li>-->
+<!--                    <li class="page-item" th:each="i : ${#numbers.sequence(0, posts.totalPages - 1)}"-->
+<!--                        th:classappend="${i == posts.number} ? 'active'">-->
+<!--                        <a class="page-link" th:href="@{/post(page=${i}, categoryId=${categoryId})}" th:text="${i + 1}"></a>-->
+<!--                    </li>-->
+<!--                    <li class="page-item" th:classappend="${posts.last} ? 'disabled'">-->
+<!--                        <a class="page-link" th:href="@{/post(page=${posts.number + 1}, categoryId=${categoryId})}">下一页</a>-->
+<!--                    </li>-->
+<!--                </ul>-->
+<!--            </nav>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--<div th:replace="layout/base :: footer"></div>-->
+<!--</body>-->
+<!--</html>-->
 
 <!--<!DOCTYPE html>-->
 <!--<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">-->
