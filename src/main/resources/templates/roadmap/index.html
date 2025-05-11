@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/base :: head">
+    <title>技术路线</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* Add this to your src/main/resources/static/css/style.css */
+
+        /* 定制 PDF 卡片网格的样式 */
+        .pdf-card {
+            /* 示例深色背景和文字颜色，您可以根据截图调整 */
+            background-color: #2a2a38; /* 深色背景 */
+            color: #ffffff; /* 白色文字 */
+            border: none; /* 移除默认边框 */
+            border-radius: 8px; /* 圆角 */
+            padding: 15px; /* 内边距 */
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* 悬停平滑过渡效果 */
+            position: relative; /* 为 stretched-link 或绝对定位的图标准备 */
+            overflow: hidden; /* 隐藏可能溢出的内容 */
+            display: flex; /* 使用 Flexbox 布局内容 */
+            flex-direction: column; /* 内容垂直排列 */
+            justify-content: center; /* 垂直居中文本 */
+            align-items: center; /* 水平居中文本 */
+            min-height: 100px; /* 设置最小高度，保持卡片大小一致 */
+            text-align: center; /* 确保文字居中 */
+            cursor: pointer; /* 显示手型光标表示可点击 */
+        }
+
+        .pdf-card:hover {
+            transform: translateY(-5px); /* 向上轻微移动 */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4); /* 增加阴影效果 */
+        }
+
+        .pdf-card .card-body {
+            padding: 0; /* 移除默认内边距，由 .pdf-card 控制 */
+            width: 100%; /* 确保 body 宽度填充卡片 */
+        }
+
+        .pdf-card .card-title {
+            margin-bottom: 0; /* 移除默认底边距 */
+            font-size: 1.1rem; /* 标题字体大小 */
+            /* 如果标题可能很长，可以考虑文本溢出处理 */
+            /* text-overflow: ellipsis; */
+            /* overflow: hidden; */
+            /* white-space: nowrap; */
+        }
+
+        /* Style for the optional bookmark icon (如果添加了图标) */
+        /* .pdf-bookmark-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7); // 图标颜色略浅
+            z-index: 2; // 确保图标在链接之上
+        } */
+
+        /* 确保 stretched-link 覆盖整个卡片 */
+        .pdf-card .stretched-link {
+            z-index: 1; /* 确保链接在卡片内容之上 */
+        }
+
+        /* Add this to your src/main/resources/static/css/style.css */
+
+        /* 确保 PDF 查看器容器和 iframe 具备基本的响应性 */
+        #pdf-viewer-container {
+            /* 现有的边框和圆角样式 */
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 20px; /* 确保与上方内容有间距 */
+        }
+
+        #pdf-iframe {
+            width: 100%; /* 确保宽度填充父容器 */
+            height: 800px; /* 默认高度，用于大屏幕 */
+            border: none;
+            display: block; /* 移除 iframe 下方的额外空间 */
+        }
+
+        /* **新增：使用媒体查询调整手机端 iframe 高度** */
+        /* 当屏幕宽度小于或等于 768px 时应用此样式 (通常对应平板和手机) */
+        @media (max-width: 768px) {
+            #pdf-iframe {
+                height: 500px; /* 在小屏幕上设置一个较小的高度，您可以根据需要调整这个值 */
+                /* 或者使用视口高度的百分比 */
+                /* height: 60vh; // 示例：设置为视口高度的 60% */
+            }
+        }
+
+        /* 如果需要，可以为更小的屏幕设置更小的高度 */
+        /* @media (max-width: 576px) { // 例如，为超小屏幕（手机竖屏）设置
+            #pdf-iframe {
+                height: 400px;
+            }
+        } */
+    </style>
+</head>
+<body>
+<div th:replace="layout/base :: nav"></div>
+
+<div class="container mt-4">
+    <h2>技术路线图</h2>
+
+    <p>您可以从下面的列表中选择您感兴趣的技术路线图 (PDF 版本)。</p>
+
+    <div class="row mt-4" id="pdf-grid-container">
+        <div class="col-sm-6 col-md-4 col-lg-3 mb-4" th:each="pdfInfo : ${pdfList}">
+            <div class="card pdf-card" th:data-pdf-url="${pdfInfo.url}">
+                <div class="card-body">
+                    <h5 class="card-title text-center" th:text="${pdfInfo.title}">PDF Title</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="pdf-options-container" class="mt-4 p-3 border rounded" style="display: none;">
+        <h5>请选择阅读方式：</h5>
+        <button id="native-read-btn" class="btn btn-primary me-2">原生阅读</button>
+        <button id="offline-read-btn" class="btn btn-secondary">离线阅读</button>
+    </div>
+
+    <div id="pdf-viewer-container" class="mt-4" style="display: none;">
+        <iframe id="pdf-iframe" src="" style="width:100%; height:800px; border: none;">
+            <p>您的浏览器不支持内嵌 PDF。请 <a href="#" target="_blank" id="pdf-download-link">点击这里下载/查看 PDF 文件</a>。</p>
+        </iframe>
+    </div>
+
+</div>
+
+<div th:replace="layout/base :: footer"></div>
+
+<script>
+    // 等待 DOM 内容加载完成
+    document.addEventListener("DOMContentLoaded", function() {
+        // 获取页面上的重要元素
+        const pdfGridContainer = document.getElementById('pdf-grid-container'); // 网格容器
+        const pdfOptionsContainer = document.getElementById('pdf-options-container'); // 选项按钮容器
+        const nativeReadBtn = document.getElementById('native-read-btn'); // 原生阅读按钮
+        const offlineReadBtn = document.getElementById('offline-read-btn'); // 离线阅读按钮
+        const pdfViewerContainer = document.getElementById('pdf-viewer-container'); // PDF 查看器容器
+        const pdfIframe = document.getElementById('pdf-iframe'); // 内嵌的 iframe
+        const pdfDownloadLink = document.getElementById('pdf-download-link'); // iframe 备用链接
+
+        let currentPdfUrl = null; // 用于存储当前选中 PDF 的 URL
+
+        // 页面加载时隐藏选项和查看器
+        pdfOptionsContainer.style.display = 'none';
+        pdfViewerContainer.style.display = 'none';
+
+        // **为网格容器添加点击事件监听器 (使用事件委托)**
+        // 点击网格内的任何地方，都会检查是否点击了 .pdf-card
+        pdfGridContainer.addEventListener('click', function(event) {
+            // closest('.pdf-card') 查找最近的拥有 'pdf-card' 类的父元素或自身
+            const clickedCard = event.target.closest('.pdf-card');
+
+            // 如果确实点击了某个 PDF 卡片
+            if (clickedCard) {
+                // 获取存储在卡片 data-pdf-url 属性中的 PDF URL
+                currentPdfUrl = clickedCard.dataset.pdfUrl;
+
+                if (currentPdfUrl) {
+                    // **在显示新选项前，先隐藏之前可能显示的查看器**
+                    pdfViewerContainer.style.display = 'none';
+                    // 清空 iframe 的 src 属性，停止加载任何之前显示的 PDF
+                    pdfIframe.src = '';
+
+                    // **显示阅读选项容器**
+                    pdfOptionsContainer.style.display = 'block';
+
+                    // 更新 iframe 备用链接的 href 属性，指向当前 PDF 的 URL
+                    pdfDownloadLink.href = currentPdfUrl;
+
+                    // 可选：滚动到选项容器的位置，让用户看到选项
+                    // pdfOptionsContainer.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        });
+
+        // **为“原生阅读”按钮添加点击事件监听器**
+        nativeReadBtn.addEventListener('click', function() {
+            if (currentPdfUrl) {
+                // 使用 window.open() 在新标签页打开 PDF URL，依赖浏览器原生能力
+                window.open(currentPdfUrl, '_blank');
+
+                // **在新标签页打开后，隐藏选项容器**
+                pdfOptionsContainer.style.display = 'none';
+                // 可选：清空当前选中的 URL
+                // currentPdfUrl = null;
+            }
+        });
+
+        // **为“离线阅读”按钮添加点击事件监听器 (当前实现为内嵌 iframe)**
+        offlineReadBtn.addEventListener('click', function() {
+            if (currentPdfUrl) {
+                // **将当前 PDF 的 URL 设置为 iframe 的 src 属性，加载 PDF**
+                pdfIframe.src = currentPdfUrl;
+
+                // **显示 PDF 查看器容器**
+                pdfViewerContainer.style.display = 'block';
+
+                // **隐藏选项容器**
+                pdfOptionsContainer.style.display = 'none';
+
+                // 可选：滚动到查看器容器的位置
+                // pdfViewerContainer.scrollIntoView({ behavior: 'smooth' });
+                // 可选：清空当前选中的 URL
+                // currentPdfUrl = null;
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
+
+
+

@@ -16,6 +16,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                //禁用Refused to display 'http://localhost:8080/' in a frame because it set 'X-Frame-Options' to 'deny'.
+            .headers(headers -> headers
+                    .frameOptions(frameOptions -> frameOptions
+                                    .sameOrigin() // **修改：允许同源嵌入**
+                            // .deny() // 原始设置，拒绝任何来源嵌入
+                            // .disable() // 完全禁用 (不推荐，有安全风险)
+                    )
+            )
             .csrf().disable()
             .authorizeRequests()
                 // 放行静态资源路径（优先级高）
@@ -55,6 +63,7 @@ public class SecurityConfig {
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
                 .permitAll();
+
         
         return http.build();
     }
