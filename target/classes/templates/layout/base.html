@@ -38,9 +38,7 @@
 <!--                    下拉菜单，由Bootstrap实现，这些类是固定的，class由Bootstrap的css进行修饰-->
                     <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" >
-<!--                            图像占位（暂时先写死）-->
-
-                    <!--         th:src="${#authentication.principal.avatar}"  alt="用户头像"                        "-->
+<!-- ${#authentication.principal.avatar}的内容不会实时更新，需要在手动控制更新-->
                             <img src="#"
                                  th:src="${#authentication.principal.avatar}"
                                  alt="用户头像"

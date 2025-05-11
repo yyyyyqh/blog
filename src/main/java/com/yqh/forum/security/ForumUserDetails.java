@@ -7,6 +7,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
+/**
+ * 作用：这个对象是存储用户信息并返回给 Spring Security 的。
+ * Spring Security 保存的用户主体信息，也就是实现了 UserDetails 接口的那个对象。
+ */
+
 public class ForumUserDetails implements UserDetails {
 
     // UserDetails 接口需要的字段和方法
