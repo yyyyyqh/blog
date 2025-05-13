@@ -4,6 +4,8 @@ import com.yqh.forum.dto.UserDTO;
 import com.yqh.forum.dto.UserRegistrationDTO;
 import com.yqh.forum.model.User;
 
+import java.util.List;
+
 public interface UserService {
     UserDTO registerNewUser(UserRegistrationDTO registrationDTO);
     UserDTO findByUsername(String username);
@@ -13,4 +15,5 @@ public interface UserService {
     User getCurrentUser();
     void updateUser(User user);
     void changePassword(String currentPassword, String newPassword, String confirmPassword);
+    List<User> getAllUsers();
 } 

@@ -44,6 +44,12 @@
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{/roadmap}">技术路线</a>
                     </li>
+                    <!--管理员独有选项-->
+                    <!--用户管理-->
+                    <li class="nav-item" sec:authorize="hasRole('ROLE_ADMIN')">
+                        <a class="nav-link" th:href="@{/admin/users/dashboard}">用户管理</a>
+                    </li>
+
 
                 </ul>
                 <ul class="navbar-nav">

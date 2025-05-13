@@ -120,6 +120,7 @@ CREATE INDEX idx_user_roles_role_id ON user_roles (role_id);
 INSERT INTO roles (name) VALUES ('ROLE_USER'); -- 假设这是普通用户角色
 INSERT INTO roles (name) VALUES ('ROLE_ADMIN'); -- 假设这是管理员角色
 
-
+-- 将用户 A (ID=1) 设置为管理员 (ROLE_ADMIN, ID=1)
+INSERT INTO user_roles (user_id, role_id) VALUES (1, 1);
 ```
 

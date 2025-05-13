@@ -13,6 +13,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -107,5 +110,18 @@ public class UserServiceImpl implements UserService {
         dto.setEmail(user.getEmail());
         dto.setAvatar(user.getAvatar());
         return dto;
+    }
+
+    @Override // 确保方法签名与 UserService 接口中的一致
+    public List<User> getAllUsers() {
+        // 调用 UserRepository 的方法查询所有用户
+        List<User> users = userRepository.findAll(); // Spring Data JPA 的 findAll() 方法通常返回 List，即使没有数据也是空 List，而不是 null
+
+        // **重要：确保这里返回的不是 null**
+        // 虽然 userRepository.findAll() 通常不会返回 null，但为了安全起见，可以加一个 null 检查
+        return users != null ? users : Collections.emptyList();
+
+        // 或者更简洁，因为 findAll() 几乎总是返回非 null 的 List：
+        // return userRepository.findAll();
     }
 } 
