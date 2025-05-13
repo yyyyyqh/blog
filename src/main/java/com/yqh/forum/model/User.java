@@ -1,11 +1,15 @@
 package com.yqh.forum.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 // @Data 注解：自动生成 getter/setter/toString/equals/hashCode 方法
 // @Entity：实体类
@@ -14,6 +18,9 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "users")
+// 建议排除关联字段在 equals/hashCode/toString 之外，防止问题
+@EqualsAndHashCode(exclude = {"roles"})
+@ToString(exclude = {"roles"})
 public class User {
     //@Id：主键
     @Id
@@ -43,4 +50,15 @@ public class User {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    // **新增：与 Role 实体的 @ManyToMany 关联映射**
+    // FetchType.EAGER 表示加载 User 时立即加载关联的 Role 集合
+    @ManyToMany(fetch = FetchType.EAGER)
+    // @JoinTable 定义了关联表的名称和外键关系
+    @JoinTable(
+            name = "user_roles", // 关联表的名称 (需要与数据库中的关联表名一致)
+            joinColumns = @JoinColumn(name = "user_id"), // 在 user_roles 表中指向 User 实体的外键列名 (需要与数据库列名一致)
+            inverseJoinColumns = @JoinColumn(name = "role_id") // 在 user_roles 表中指向 Role 实体的外键列名 (需要与数据库列名一致)
+    )
+    private Set<Role> roles = new HashSet<>(); // 用户拥有的角色集合
 } 
