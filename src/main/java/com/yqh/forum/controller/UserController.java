@@ -168,6 +168,7 @@ public class UserController {
         }
     }
 
+    // /user/profile/password -> user/change-password.html
     @GetMapping("/profile/password")
     public String showChangePasswordForm() {
         return "user/change-password";

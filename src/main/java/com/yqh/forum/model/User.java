@@ -15,13 +15,13 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "users")
 public class User {
-//    @Id：主键
+    //@Id：主键
     @Id
-//    @GeneratedValue：主键生成策略, strategy = GenerationType.IDENTITY: 主键自增
+    //@GeneratedValue：主键生成策略, strategy = GenerationType.IDENTITY: 主键自增
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//   nullable = false: 不能为空，unique = true: 唯一性
+    //nullable = false: 不能为空，unique = true: 唯一性
     @Column(nullable = false, unique = true)
     private String username;
 
@@ -31,8 +31,9 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-//    name = "avatar_url"：数据库字段名
+    //name = "avatar_url"：数据库字段名
     @Column(name = "avatar_url")
+    //默认头像
     private String avatar = "/images/default-avatar.png";
 
     @CreationTimestamp

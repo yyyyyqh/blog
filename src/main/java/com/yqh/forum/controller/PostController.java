@@ -113,6 +113,7 @@ public class PostController {
         return "post/list";
     }
 
+    //get
     @GetMapping("/create")
     public String showCreateForm(Model model) {
         model.addAttribute("post", new PostDTO());
@@ -120,6 +121,7 @@ public class PostController {
         return "post/create";
     }
 
+    //post
     @PostMapping("/create")
     public String createPost(
             @Valid @ModelAttribute("post") PostDTO postDTO,
@@ -189,6 +191,7 @@ public class PostController {
         return "post/edit";
     }
 
+    //将/{id}/edit映射到updatePost方法 /1/edit->redirect:/post/1
     @PostMapping("/{id}/edit")
     public String updatePost(
             @PathVariable Long id,

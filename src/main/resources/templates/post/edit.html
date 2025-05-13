@@ -1,3 +1,4 @@
+<!--编辑帖子的页面/{id}/edit-->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="layout/base :: head">
@@ -8,20 +9,24 @@
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-8">
+            <!--表单-->
             <div class="card">
                 <div class="card-header">
-                    <h4 class="mb-0">编辑帖子</h4> </div>
+                    <h4 class="mb-0">编辑帖子</h4>
+                </div>
                 <div class="card-body">
                     <form th:action="@{/post/{id}/edit(id=*{id})}" th:object="${post}" method="post">
 
                         <input type="hidden" th:field="*{id}">
 
+                        <!--标题-->
                         <div class="mb-3">
                             <label for="title" class="form-label">标题</label>
                             <input type="text" class="form-control" id="title" th:field="*{title}" required>
                             <div class="text-danger" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
                         </div>
 
+                        <!--分类-->
                         <div class="mb-3">
                             <label for="category" class="form-label">分类</label>
                             <select class="form-select" id="category" th:field="*{category.id}" required>
@@ -33,14 +38,17 @@
                             <div class="text-danger" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></div>
                         </div>
 
+                        <!--内容-->
                         <div class="mb-3">
                             <label for="content" class="form-label">内容</label>
                             <textarea class="form-control" id="content" th:field="*{content}" rows="10" required></textarea>
                             <div class="text-danger" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
                         </div>
 
+                        <!--更新/取消按钮-->
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">更新</button> <a th:href="@{/post/{id}(id=*{id})}" class="btn btn-secondary">取消</a>
+                            <button type="submit" class="btn btn-primary">更新</button>
+                            <a th:href="@{/post/{id}(id=*{id})}" class="btn btn-secondary">取消</a>
                         </div>
                     </form>
                 </div>

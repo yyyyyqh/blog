@@ -27,6 +27,7 @@ public class CommentServiceImpl implements CommentService {
     @Autowired
     private UserService userService;
 
+
     @Override
     public CommentDTO createComment(CommentDTO commentDTO) {
         User currentUser = userService.getCurrentUser();

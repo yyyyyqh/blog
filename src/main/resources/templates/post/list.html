@@ -9,10 +9,13 @@
 
 <div class="container mt-4">
     <div class="row mb-4">
+        <!--标题-->
         <div class="col">
             <h2 th:text="${isMyPostsView} ? '我的帖子列表' : '所有帖子列表'">帖子列表</h2>
         </div>
+        <!--搜索框-->
         <div class="col-auto">
+            <!--搜索框的实现，通过submit提交/post/search请求-->
             <form th:action="@{/post/search}" method="get" class="d-flex">
                 <input type="text" name="keyword" class="form-control me-2" placeholder="搜索帖子...">
                 <button type="submit" class="btn btn-outline-primary">搜索</button>
@@ -20,16 +23,21 @@
         </div>
     </div>
 
+    <!--分类目录-->
+    <!--在"我的帖子"中不显示分类目录-->
     <div class="row">
         <div class="col-md-3" th:if="${!isMyPostsView}">
             <div class="card mb-4">
+                <!--分类列表标题-->
                 <div class="card-header">
                     <h5 class="mb-0">分类</h5>
                 </div>
                 <div class="list-group list-group-flush">
+                    <!--默认选中全部选项-->
                     <a th:href="@{/post}" class="list-group-item list-group-item-action" th:classappend="${categoryId == null && !isMyPostsView} ? 'active'">
                         全部
                     </a>
+                    <!--遍历生成所有分类选项-->
                     <a th:each="category : ${categories}"
                        th:href="@{/post(categoryId=${category.id})}"
                        th:text="${category.name}"
@@ -40,25 +48,34 @@
             </div>
         </div>
 
+        <!--帖子-->
+        <!--在我的页面中，没有目录，帖子长度变宽-->
         <div th:classappend="${isMyPostsView} ? 'col-md-12' : 'col-md-9'">
             <div class="list-group">
                 <div th:each="post : ${posts.content}" class="list-group-item list-group-item-action">
                     <div class="d-flex w-100 justify-content-between">
+                        <!--帖子标题-->
                         <h5 class="mb-1">
+                            <!--标题有超链接，点击会请求/post/{id}-->
                             <a th:href="@{/post/{id}(id=${post.id})}" th:text="${post.title}" class="text-decoration-none"></a>
                         </h5>
+                        <!--发布时间-->
                         <small th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></small>
                     </div>
+                    <!--摘要信息-->
                     <p class="mb-1" th:text="${post.summaryContent}"></p>
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
+                            <!--作者-->
                             <small>
                                 作者：<span th:text="${post.author.username}"></span>
                             </small>
+                            <!--分类-->
                             <small class="ms-3">
                                 分类：<span th:text="${post.category.name}"></span>
                             </small>
                         </div>
+                        <!--浏览数-->
                         <small>
                             浏览：<span th:text="${post.viewCount}"></span>
                         </small>
@@ -66,14 +83,18 @@
                 </div>
             </div>
 
+            <!--分页控制-->
             <nav th:if="${posts.totalPages > 1}" class="mt-4">
                 <ul class="pagination justify-content-center">
+                    <!--上一页-->
                     <li class="page-item" th:classappend="${posts.first} ? 'disabled'">
+                        <!--根据所有帖子和我的帖子，不同页面不同处理-->
                         <a class="page-link"
                            th:href="${isMyPostsView} ? @{/post/my(page=${posts.number - 1})} : @{/post(page=${posts.number - 1}, categoryId=${categoryId})}">
                             上一页
                         </a>
                     </li>
+                    <!--数字选择-->
                     <li class="page-item" th:each="i : ${#numbers.sequence(0, posts.totalPages - 1)}"
                         th:classappend="${i == posts.number} ? 'active'">
                         <a class="page-link"
@@ -81,6 +102,7 @@
                            th:text="${i + 1}">
                         </a>
                     </li>
+                    <!--下一页-->
                     <li class="page-item" th:classappend="${posts.last} ? 'disabled'">
                         <a class="page-link"
                            th:href="${isMyPostsView} ? @{/post/my(page=${posts.number + 1})} : @{/post(page=${posts.number + 1}, categoryId=${categoryId})}">
