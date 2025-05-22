@@ -19,12 +19,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor // Lombok 注解，自动生成构造函数
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    //注册新用户
     @Override
     @Transactional
     public UserDTO registerNewUser(UserRegistrationDTO registrationDTO) {
@@ -85,6 +86,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.existsByEmail(email);
     }
 
+    //更改密码
     @Override
     @Transactional
     public void changePassword(String currentPassword, String newPassword, String confirmPassword) {
@@ -119,12 +121,11 @@ public class UserServiceImpl implements UserService {
         // 调用 UserRepository 的方法查询所有用户
         List<User> users = userRepository.findAll(); // Spring Data JPA 的 findAll() 方法通常返回 List，即使没有数据也是空 List，而不是 null
 
-        // **重要：确保这里返回的不是 null**
-        // 虽然 userRepository.findAll() 通常不会返回 null，但为了安全起见，可以加一个 null 检查
-        return users != null ? users : Collections.emptyList();
+
+        //return users != null ? users : Collections.emptyList();
 
         // 或者更简洁，因为 findAll() 几乎总是返回非 null 的 List：
-        // return userRepository.findAll();
+         return userRepository.findAll();
     }
 
     @Override

@@ -17,7 +17,12 @@ public class CommentController {
     @Autowired
     private CommentService commentService;
 
-//    评论发布时的处理
+    /**
+     * 发表评论
+     * @param commentDTO
+     * @param redirectAttributes
+     * @return "redirect:/post/" + commentDTO.getPostId()
+     */
     @PostMapping("/create")
     public String createComment(@ModelAttribute CommentDTO commentDTO,
                               RedirectAttributes redirectAttributes) {
@@ -27,10 +32,16 @@ public class CommentController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "评论发布失败：" + e.getMessage());
         }
-//    返回了一个重定向地址    在header的Location属性，重定向的位置
         return "redirect:/post/" + commentDTO.getPostId();
     }
 
+    /**
+     * 修改评论, /comment/{id}/edit
+     * @param id
+     * @param commentDTO
+     * @param redirectAttributes
+     * @return "redirect:/post/" + commentDTO.getPostId()
+     */
     @PostMapping("/{id}/edit")
     public String updateComment(@PathVariable Long id,
                               @ModelAttribute CommentDTO commentDTO,
@@ -44,12 +55,20 @@ public class CommentController {
         return "redirect:/post/" + commentDTO.getPostId();
     }
 
+    /**
+     * 删除评论, /comment/{id}/delete
+     * @param id
+     * @param postId
+     * @param redirectAttributes
+     * @return "redirect:/post/" + postId
+     */
     @PostMapping("/{id}/delete")
     public String deleteComment(@PathVariable Long id,
                               @RequestParam Long postId,
                               RedirectAttributes redirectAttributes) {
         try {
             commentService.deleteComment(id);
+            //
             redirectAttributes.addFlashAttribute("successMessage", "评论删除成功");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "评论删除失败：" + e.getMessage());
@@ -57,12 +76,15 @@ public class CommentController {
         return "redirect:/post/" + postId;
     }
 
-    @GetMapping("/post/{postId}")
-    public String listComments(@PathVariable Long postId,
-                             @RequestParam(defaultValue = "0") int page,
-                             @RequestParam(defaultValue = "10") int size) {
-        Page<CommentDTO> comments = commentService.findByPostId(postId,
-                PageRequest.of(page, size, Sort.by("createdAt").descending()));
-        return "comment/list";
-    }
+    /**
+     * 评论列表，集成在PostController中，这里的暂时不处理
+     */
+    //@GetMapping("/post/{postId}")
+    //public String listComments(@PathVariable Long postId,
+    //                         @RequestParam(defaultValue = "0") int page,
+    //                         @RequestParam(defaultValue = "10") int size) {
+    //    Page<CommentDTO> comments = commentService.findByPostId(postId,
+    //            PageRequest.of(page, size, Sort.by("createdAt").descending()));
+    //    return "comment/list";
+    //}
 } 

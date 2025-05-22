@@ -69,7 +69,7 @@ CREATE TABLE comments (
 
 ## 技术栈
 - 后端：Spring Boot 2.7.6
-- 数据库：MySQL 8.0
+- 数据库：MySQL 5.7.42
 - 前端：Thymeleaf + Bootstrap 5
 - 安全：Spring Security 
 

@@ -3,7 +3,6 @@ package com.yqh.forum.security; // 建议放在一个与安全相关的包中
 import com.yqh.forum.model.User; // 导入您的 User 实体
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-// ... 其他导入
 
 import java.util.Collection;
 

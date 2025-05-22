@@ -31,6 +31,9 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Collection;
 
+/**
+ * 普通用户的操作
+ */
 @Controller
 @RequestMapping("/user")
 //@RequiredArgsConstructor 使用了 @Value 注入字段，通常不再需要 @RequiredArgsConstructor
@@ -39,7 +42,7 @@ public class UserController {
 //    使用Autowired注入，@Value注入字段不能是final
     @Autowired
     private UserService userService;
-//    待注入
+    //使用application.properties中配置的属性值
     @Value("${app.avatar-upload-dir}")
     private String UPLOAD_DIR;
 //    private static final String UPLOAD_DIR = "src/main/resources/static/uploads/avatars/";
@@ -108,7 +111,7 @@ public class UserController {
                 // 确保上传目录存在
                 Path uploadPath = Paths.get(UPLOAD_DIR);
                 if (!Files.exists(uploadPath)) {
-//                    createDirectories创建多级目录
+                    //createDirectories方法创建多级目录（形如:/path/dict1/dict2/file）
                     Files.createDirectories(uploadPath);
                 }
                 

@@ -8,6 +8,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * 分类控制器
+ * （暂未使用到）
+ */
 @Controller
 @RequestMapping("/category")
 public class CategoryController {

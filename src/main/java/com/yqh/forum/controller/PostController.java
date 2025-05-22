@@ -25,24 +25,30 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
 
+/**
+ * 帖子控制器
+ */
 @Controller
 @RequestMapping("/post")
 public class PostController {
 
     @Autowired
     private PostService postService;
-
     @Autowired
     private CategoryService categoryService;
-
     @Autowired
     private CommentService commentService;
-
     @Autowired // **新增注入 UserRepository**
     private UserRepository userRepository;
 
 
-    // List all posts or filter by category
+    /**
+     * 显示所有帖子，或根据分类显示帖子
+     * @param page
+     * @param categoryId
+     * @param model
+     * @return "post/list"
+     */
     @GetMapping
     public String listPosts(
             @RequestParam(defaultValue = "0") int page,
@@ -64,10 +70,16 @@ public class PostController {
         // **确保添加 isMyPostsView 属性**
         model.addAttribute("isMyPostsView", false);
 
-        return "post/list"; // 返回 list.html 模板
+        return "post/list";
     }
 
-    // **处理 /post/my 请求，显示当前登录用户的帖子列表**
+    /**
+     * 显示当前登录用户的帖子列表
+     * @param page
+     * @param userDetails
+     * @param model
+     * @return "post/list"
+     */
     @GetMapping("/my")
     public String listMyPosts(
             @RequestParam(defaultValue = "0") int page, // 分页参数
@@ -95,7 +107,13 @@ public class PostController {
         return "post/list"; // 复用 list.html 模板来显示结果
     }
 
-
+    /**
+     * 搜索帖子
+     * @param keyword
+     * @param page
+     * @param model
+     * @return "post/list"
+     */
     @GetMapping("/search")
     public String searchPosts(
             @RequestParam String keyword,
@@ -113,7 +131,11 @@ public class PostController {
         return "post/list";
     }
 
-    //get
+    /**
+     * 发布帖子页面
+     * @param model
+     * @return
+     */
     @GetMapping("/create")
     public String showCreateForm(Model model) {
         model.addAttribute("post", new PostDTO());
@@ -121,7 +143,15 @@ public class PostController {
         return "post/create";
     }
 
-    //post
+    /**
+     * 发送创建帖子请求
+     * @param postDTO
+     * @param result
+     * @param model
+     * @param userDetails
+     * @param redirectAttributes
+     * @return
+     */
     @PostMapping("/create")
     public String createPost(
             @Valid @ModelAttribute("post") PostDTO postDTO,
@@ -143,7 +173,14 @@ public class PostController {
             return "redirect:/post/create";
         }
     }
+    //
 
+    /**
+     * 帖子详情页面
+     * @param id
+     * @param model
+     * @return "post/view"
+     */
     @GetMapping("/{id}")
     public String viewPost(@PathVariable Long id, Model model) {
         postService.incrementViewCount(id);
@@ -161,6 +198,7 @@ public class PostController {
         model.addAttribute("post", post);
         model.addAttribute("postHtmlContent", htmlContent);
 
+        //评论列表
         Pageable pageable = PageRequest.of(0, 10);
         Page<CommentDTO> commentPage = commentService.findByPostId(id, pageable);
 
@@ -169,6 +207,11 @@ public class PostController {
         return "post/view";
     }
 
+    /**
+     * 帖子编辑页面
+     * /post/{id}/edit
+     * @return "post/edit"
+     */
     @GetMapping("/{id}/edit")
     public String showEditForm(
             @PathVariable Long id,
@@ -191,7 +234,18 @@ public class PostController {
         return "post/edit";
     }
 
-    //将/{id}/edit映射到updatePost方法 /1/edit->redirect:/post/1
+    //
+
+    /**
+     * post操作，编辑完成跳转回帖子
+     * @param id
+     * @param postDTO
+     * @param result
+     * @param model
+     * @param userDetails
+     * @param redirectAttributes
+     * @return "post/edit"
+     */
     @PostMapping("/{id}/edit")
     public String updatePost(
             @PathVariable Long id,
@@ -214,7 +268,16 @@ public class PostController {
             return "redirect:/post/" + id + "/edit";
         }
     }
+    //
 
+    /**
+     * 帖子删除操作
+     *
+     * @param id
+     * @param userDetails
+     * @param redirectAttributes
+     * @return "redirect:/post/"
+     */
     @PostMapping("/{id}/delete")
     public String deletePost(
             @PathVariable Long id,
@@ -230,243 +293,3 @@ public class PostController {
         }
     }
 }
-
-//package com.yqh.forum.controller;
-//
-//import com.yqh.forum.dto.CommentDTO;
-//import com.yqh.forum.dto.PostDTO;
-//import com.yqh.forum.model.Post;
-//import com.yqh.forum.model.User;
-//import com.yqh.forum.repository.UserRepository;
-//import com.yqh.forum.service.CategoryService;
-//import com.yqh.forum.service.CommentService;
-//import com.yqh.forum.service.PostService;
-//import com.yqh.forum.service.util.MarkdownUtil; // 新增导入 MarkdownUtil
-//
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.data.domain.Page;
-//import org.springframework.data.domain.PageRequest;
-//import org.springframework.data.domain.Pageable;
-//import org.springframework.data.domain.Sort;
-//import org.springframework.security.core.annotation.AuthenticationPrincipal;
-//import org.springframework.security.core.userdetails.UserDetails;
-//import org.springframework.stereotype.Controller;
-//import org.springframework.ui.Model; // **新增导入 Model**
-//import org.springframework.validation.BindingResult;
-//import org.springframework.web.bind.annotation.*;
-//import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-//
-//import javax.validation.Valid;
-//
-//@Controller
-//@RequestMapping("/post")
-//public class PostController {
-//
-//    @Autowired
-//    private PostService postService;
-//
-//    @Autowired
-//    private CategoryService categoryService;
-//
-//    @Autowired // 注入 CommentService
-//    private CommentService commentService;
-//
-//    @Autowired
-//    private UserRepository userRepository;
-//
-//    @GetMapping
-//    public String listPosts(
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(required = false) Long categoryId,
-//            Model model) {
-//        PageRequest pageRequest = PageRequest.of(page, 10, Sort.by("createdAt").descending());
-//        Page<PostDTO> posts;
-//
-//        if (categoryId != null) {
-//            posts = postService.findByCategoryId(categoryId, pageRequest);
-//        } else {
-//            posts = postService.findAll(pageRequest);
-//        }
-//
-//        model.addAttribute("posts", posts);
-//        model.addAttribute("categories", categoryService.findAll());
-//        model.addAttribute("categoryId", categoryId);
-//        return "post/list";
-//    }
-//
-//    @GetMapping("/search")
-//    public String searchPosts(
-//            @RequestParam String keyword,
-//            @RequestParam(defaultValue = "0") int page,
-//            Model model) {
-//        PageRequest pageRequest = PageRequest.of(page, 10, Sort.by("createdAt").descending());
-//        Page<PostDTO> posts = postService.search(keyword, pageRequest);
-//
-//        model.addAttribute("posts", posts);
-//        model.addAttribute("keyword", keyword);
-//        model.addAttribute("categories", categoryService.findAll());
-//        return "post/list";
-//    }
-//
-//    @GetMapping("/create")
-//    public String showCreateForm(Model model) {
-//        model.addAttribute("post", new PostDTO());
-//        model.addAttribute("categories", categoryService.findAll());
-//        return "post/create";
-//    }
-//
-//    @PostMapping("/create")
-//    public String createPost(
-//            @Valid @ModelAttribute("post") PostDTO postDTO,
-//            BindingResult result,
-//            Model model, // **新增 Model 参数**
-//            @AuthenticationPrincipal UserDetails userDetails,
-//            RedirectAttributes redirectAttributes) {
-//        if (result.hasErrors()) {
-//            // 如果有错误，重新获取分类，以便在表单中显示
-//            model.addAttribute("categories", categoryService.findAll());
-//            return "post/create";
-//        }
-//
-//        try {
-//            postService.createPost(postDTO, userDetails.getUsername());
-//            redirectAttributes.addFlashAttribute("successMessage", "帖子发布成功！"); // 保持与 base.html 一致的 flash 属性名
-//            return "redirect:/post";
-//        } catch (Exception e) {
-//            redirectAttributes.addFlashAttribute("errorMessage", "帖子发布失败：" + e.getMessage()); // 保持一致
-//            return "redirect:/post/create";
-//        }
-//    }
-//
-//    //   显示帖子
-//    @GetMapping("/{id}")
-//    public String viewPost(@PathVariable Long id, Model model) {
-//        //        增加浏览次数
-//        postService.incrementViewCount(id);
-//
-//        //        通过postService先找到post
-//        PostDTO post = postService.findById(id);
-//
-//        if (post == null) {
-//            // 帖子不存在，返回 404 或错误页面
-//            return "error/404"; // 假设您有 error/404.html 模板
-//        }
-//
-//        // **新增：将 Markdown 内容转换成 HTML**
-//        String markdownContent = post.getContent(); // 获取原始 Markdown 内容
-//        String htmlContent = MarkdownUtil.convertMarkdownToHtml(markdownContent); // 使用工具类进行转换
-//
-//        //        添加到model中的变量
-//        model.addAttribute("post", post);
-//        // **新增：将转换后的 HTML 内容添加到 Model 中**
-//        model.addAttribute("postHtmlContent", htmlContent);
-//
-//
-//        //    我们先获取第一页评论，每页显示假设为 10 条
-//        Pageable pageable = PageRequest.of(0, 10); // 获取第 0 页（即第一页），每页 10 条
-//        Page<CommentDTO> commentPage = commentService.findByPostId(id, pageable);
-//
-//        model.addAttribute("comments", commentPage.getContent());
-//
-//        // **可选：如果评论内容也支持 Markdown，可以在这里进行转换**
-//        // For (CommentDTO comment : commentPage.getContent()) {
-//        //     comment.setHtmlContent(MarkdownUtil.convertMarkdownToHtml(comment.getContent()));
-//        // }
-//        // 然后在 view.html 中使用 th:utext="${comment.htmlContent}" 显示评论内容
-//
-//        return "post/view";
-//    }
-//
-//    //
-//    @GetMapping("/{id}/edit")
-//    public String showEditForm(
-//            @PathVariable Long id,
-//            @AuthenticationPrincipal UserDetails userDetails,
-//            Model model, // **新增 Model 参数**
-//            RedirectAttributes redirectAttributes) {
-//        PostDTO post = postService.findById(id);
-//
-//        if (post == null) {
-//            return "error/404";
-//        }
-//
-//        if (!post.getAuthor().getUsername().equals(userDetails.getUsername())) {
-//            redirectAttributes.addFlashAttribute("errorMessage", "您没有权限编辑此帖子！"); // 保持一致
-//            return "redirect:/post/" + id;
-//        }
-//
-//        model.addAttribute("post", post);
-//        model.addAttribute("categories", categoryService.findAll());
-//        return "post/edit";
-//    }
-//
-//    //    编辑时
-//    @PostMapping("/{id}/edit")
-//    public String updatePost(
-//            @PathVariable Long id,
-//            @Valid @ModelAttribute("post") PostDTO postDTO,
-//            BindingResult result,
-//            Model model, // **新增 Model 参数**
-//            @AuthenticationPrincipal UserDetails userDetails,
-//            RedirectAttributes redirectAttributes) {
-//        if (result.hasErrors()) {
-//            model.addAttribute("categories", categoryService.findAll());
-//            return "post/edit";
-//        }
-//
-//        try {
-//            postService.updatePost(id, postDTO, userDetails.getUsername());
-//            redirectAttributes.addFlashAttribute("successMessage", "帖子更新成功！"); // 保持一致
-//            return "redirect:/post/" + id;
-//        } catch (Exception e) {
-//            redirectAttributes.addFlashAttribute("errorMessage", "帖子更新失败：" + e.getMessage()); // 保持一致
-//            return "redirect:/post/" + id + "/edit";
-//        }
-//    }
-//
-//    //    帖子删除操作
-//    @PostMapping("/{id}/delete")
-//    public String deletePost(
-//            @PathVariable Long id,
-//            @AuthenticationPrincipal UserDetails userDetails,
-//            RedirectAttributes redirectAttributes) {
-//        try {
-//            postService.deletePost(id, userDetails.getUsername());
-//            redirectAttributes.addFlashAttribute("successMessage", "帖子删除成功！"); // 保持一致
-//            return "redirect:/post";
-//        } catch (Exception e) {
-//            redirectAttributes.addFlashAttribute("errorMessage", "帖子删除失败：" + e.getMessage()); // 保持一致
-//            return "redirect:/post/" + id;
-//        }
-//    }
-//
-//    // **新增：处理 /post/my 请求，显示当前登录用户的帖子列表**
-//    @GetMapping("/my")
-//    public String listMyPosts(
-//            @RequestParam(defaultValue = "0") int page, // 分页参数
-//            @AuthenticationPrincipal UserDetails userDetails, // 获取当前登录用户详情
-//            Model model) {
-//
-//        // 确保用户已认证（Spring Security 通常会处理未认证用户的访问）
-//        if (userDetails == null) {
-//            // 如果用户未登录，可以重定向到登录页或显示错误
-//            return "redirect:/login";
-//        }
-//
-//        // 根据用户名查找用户实体，获取用户 ID
-//        User currentUser = userRepository.findByUsername(userDetails.getUsername())
-//                // 如果找不到用户，可能是数据不一致或其他问题，抛出异常
-//                .orElseThrow(() -> new RuntimeException("Logged-in user not found in database"));
-//
-//        // 根据当前用户 ID 获取该用户的帖子列表 (分页)
-//        PageRequest pageRequest = PageRequest.of(page, 10, Sort.by("createdAt").descending());
-//        Page<PostDTO> posts = postService.findByAuthor(currentUser.getId(), pageRequest);
-//
-//        model.addAttribute("posts", posts); // 将帖子列表添加到 Model
-//        model.addAttribute("categories", categoryService.findAll()); // 添加分类列表 (用于侧边栏)
-//        // **新增：标识当前是“我的帖子”视图**
-//        model.addAttribute("isMyPostsView", true);
-//
-//        return "post/list"; // 复用 list.html 模板来显示结果
-//    }
-//}

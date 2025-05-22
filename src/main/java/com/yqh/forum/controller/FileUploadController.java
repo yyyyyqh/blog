@@ -19,6 +19,9 @@ import java.util.HashMap; // 导入 HashMap
 import java.util.Map; // 导入 Map
 import java.util.UUID; // 导入 UUID
 
+/**
+ * 文件上传操作
+ */
 @Controller
 @RequestMapping("/upload") // 示例基础路径：/upload
 public class FileUploadController {
@@ -54,7 +57,7 @@ public class FileUploadController {
             if (originalFilename != null && originalFilename.contains(".")) {
                 fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
             }
-            // 示例：使用 UUID 作为文件名主体 + 原文件扩展名
+            // 使用 UUID 作为文件名主体 + 原文件扩展名
             String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
 
             // **定义文件保存的完整路径**
