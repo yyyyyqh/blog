@@ -16,7 +16,9 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-//这个类实现了UserDetailsService这个接口，这个接口是Spring Security提供的，用于从数据库中查询用户信息。
+/**
+ * 自定义的UserDetailsService实现类，用于从数据库中加载用户信息。
+ */
 @Service
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {

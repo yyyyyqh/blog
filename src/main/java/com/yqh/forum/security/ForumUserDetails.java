@@ -46,7 +46,11 @@ public class ForumUserDetails implements UserDetails {
 
     // ***实现 UserDetails 接口的方法***
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() { return authorities; }
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        System.out.println("DEBUG: ForumUserDetails.getAuthorities() 被调用。返回的权限: " + authorities);
+
+        return authorities;
+    }
     @Override
     public String getPassword() { return password; }
     @Override

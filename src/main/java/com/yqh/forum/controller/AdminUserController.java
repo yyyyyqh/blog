@@ -44,6 +44,8 @@ public class AdminUserController {
      * 处理 /admin/users/delete 的 GET 请求
      */
     @GetMapping("/delete") // 映射到 /admin/users/delete
+    //也可以单独对  @GetMapping("/delete") 进行权限控制
+    //@PreAuthorize("hasRole('ROLE_ADMIN')")
     public String showUserDeletionList(Model model) {
         // 调用 UserService 获取所有用户列表
         List<User> users = userService.getAllUsers();
