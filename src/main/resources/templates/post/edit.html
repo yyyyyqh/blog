@@ -40,9 +40,11 @@
                             <textarea class="form-control" id="content" th:field="*{content}" rows="10"></textarea>
                             <div class="text-danger" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
 
+                            <!--上传图片按钮-->
                             <button type="button" id="uploadImageButton" class="btn btn-secondary btn-sm mt-2">上传图片</button>
                             <input type="file" id="imageFileInput" style="display: none;" accept="image/*">
 
+                            <!--显示设置图片宽度的input输入框-->
                             <div id="imageSizeInputBlock" class="mt-2" style="display: none;">
                                 <label for="imageWidthInput" class="form-label me-2">图片宽度 (px):</label>
                                 <input type="number" id="imageWidthInput" class="form-control form-control-sm d-inline-block" style="width: 80px;" value="600" min="1">
@@ -163,9 +165,17 @@
                 }
             });
 
+            /**
+             * 触发上传
+             * 上传成功后，调用addUploadedImageInfo出现复制/预览按钮
+             * @param file
+             * @param width
+             */
+
             // **函数：执行实际的文件上传逻辑**
+            // 接收文件对象和用户指定的宽度作为参数
             function triggerUpload(file, width) {
-                uploadButton.disabled = true;
+                uploadButton.disabled = true; // 上传过程中禁用按钮
 
                 const formData = new FormData();
                 formData.append('image', file); // 'image' 与后端 @RequestParam("image") 同名
@@ -173,51 +183,59 @@
                 fetch('/upload/image', { method: 'POST', body: formData })
                     .then(response => {
                         if (!response.ok) {
-                            // 读取后端返回的错误信息
                             return response.text().then(text => { throw new Error('图片上传失败: ' + text); });
                         }
-                        // 假设后端返回的是 JSON，格式如 { "url": "/uploads/post-images/unique-filename.png" }
+                        // 假设后端返回的是 JSON，格式如 [ "java.util.HashMap", { "url": "..." } ]
                         return response.json();
                     })
                     .then(data => {
-                        if (data && data.url) {
-                            const imageUrl = data.url; // 获取后端返回的图片 Web URL
+                        // *** 关键修正点：从数组的第二个元素中获取实际的 URL 对象 ***
+                        const actualData = Array.isArray(data) && data.length > 1 ? data[1] : data; // <-- 确保这行存在
+
+                        if (actualData && actualData.url) { // 使用 actualData 进行判断
+                            const imageUrl = actualData.url; // 获取后端返回的图片 Web URL
                             const filename = file.name; // 获取文件名作为 alt 文本或链接文本
+                            // alert("图片上传成功！")
 
                             // **生成 Markdown 格式的图片链接**
-                            // EasyMDE 通常使用 Markdown 格式
+                            // 点击上传图片时，插入的图片链接格式为 ![图片名](图片URL)
                             const markdownImgTag = `![${filename}](${imageUrl})`;
-
                             console.log("生成 Markdown 图片链接，用于插入编辑器:", markdownImgTag);
 
                             // **新增：将生成的 Markdown 图片链接插入到 EasyMDE 编辑器中**
-                            // easyMDEInstance.codemirror 是 CodeMirror 实例
-                            easyMDEInstance.codemirror.replaceSelection(markdownImgTag + '\n'); // 在当前光标位置插入链接，并换行
+                            if (typeof easyMDEInstance !== 'undefined' && easyMDEInstance.codemirror) {
+                                easyMDEInstance.codemirror.replaceSelection(markdownImgTag + '\n');
+                            } else {
+                                console.warn("EasyMDE 实例未找到，无法插入 Markdown 链接。");
+                                contentTextarea.value += markdownImgTag + '\n';
+                            }
 
                             // **显示图片 Web URL 和按钮 (在下方，与编辑器分离)**
-                            // 生成用于复制的 HTML img 标签字符串 (带宽度信息)
-                            const htmlImgTagForCopy = `<img src="${imageUrl}" width="${width}">`;
+                            //将图片的地址传递给函数
+                            const htmlImgTagForCopy = `![${filename}](${imageUrl})`;
                             addUploadedImageInfo(imageUrl, htmlImgTagForCopy);
 
                         } else {
-                            throw new Error('服务器返回数据格式不正确'); // 后端返回格式不正确
+                            throw new Error('服务器返回数据格式不正确：缺少URL信息。'); // <-- 确保这里是新的错误信息
                         }
                     })
                     .catch(error => {
                         console.error('上传错误:', error);
-                        // 可选：显示用户友好的错误提示
                     })
                     .finally(() => {
-                        // 上传完成后，恢复按钮状态并隐藏大小输入区域，清空选中的文件
                         uploadButton.disabled = false;
                         imageSizeInputBlock.style.display = 'none';
                         selectedFile = null;
-                        fileInput.value = ''; // 清空文件输入框的值，以便下次选择同一个文件
-                        // 您可以在这里更新按钮文本为初始状态，例如 “上传图片”
+                        fileInput.value = '';
                     });
             } // triggerUpload 函数结束
 
 
+            /**
+             * 添加上传图片信息、复制按钮和预览按钮
+             * @param imageUrl
+             * @param linkToCopy
+             */
             // **函数：动态添加上传图片信息、复制按钮和预览按钮**
             // 这个函数用于在页面下方的容器中显示上传成功的图片信息和操作按钮
             function addUploadedImageInfo(imageUrl, linkToCopy) {
