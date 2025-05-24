@@ -38,7 +38,8 @@ public class SecurityConfig {
                         "/js/**",
                         "/images/**",
                         "/webjars/**",
-                        "/uploads/avatars/**"
+                        "/uploads/avatars/**",
+                        "/uploads/post-images/**"
                 ).permitAll()
                 // 放行其他公开路径
                 .antMatchers(

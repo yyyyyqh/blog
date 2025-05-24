@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+/**
+ * 目录数据初始化，只创建一次
+ */
 @Component
 public class DataInitializer implements CommandLineRunner {
 

@@ -14,6 +14,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * 用户数据初始化
+ * 默认创建一个默认用户 'root'，密码为 'root'，并赋予 'ROLE_ADMIN' 角色
+ */
 @Component // 确保 Spring 能够发现并注册这个 Bean
 @RequiredArgsConstructor // Lombok 注解，为 final 字段生成构造函数，用于依赖注入
 public class UserInitializer implements CommandLineRunner {
