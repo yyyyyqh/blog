@@ -36,14 +36,18 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // 删除确认
-    const deleteButtons = document.querySelectorAll('button[onclick*="confirm"]');
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            if (!confirm('确定要删除吗？')) {
-                e.preventDefault();
-            }
-        });
-    });
+    /**
+     * 会导致
+     * @type {NodeListOf<HTMLElementTagNameMap[string]>}
+     */
+    // const deleteButtons = document.querySelectorAll('button[onclick*="confirm"]');
+    // deleteButtons.forEach(button => {
+    //     button.addEventListener('click', function(e) {
+    //         if (!confirm('确定要删除吗？')) {
+    //             e.preventDefault();
+    //         }
+    //     });
+    // });
 
     // 表单验证
     const forms = document.querySelectorAll('form');

@@ -35,7 +35,7 @@
                         <td th:text="${user.id}">1</td> <td th:text="${user.username}">username</td> <td th:text="${user.email}">email@example.com</td> <td th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd HH:mm')}">YYYY-MM-DD HH:MM</td> <td>
                         <form th:action="@{/admin/users/{id}/delete(id=${user.id})}" method="post" class="d-inline">
                             <button type="submit" class="btn btn-danger btn-sm"
-                                    th:attr="onclick=|return confirm('确定要删除用户 ${user.username} 吗？\\n此操作不可撤销！')|"> 删除
+                                    th:attr="onclick=|return confirm('确定要删除用户 ${user.username} 吗？\n此操作不可撤销！')|"> 删除
                             </button>
                         </form>
                     </td>
