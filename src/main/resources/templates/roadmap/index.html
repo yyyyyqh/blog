@@ -179,8 +179,15 @@
         // **为“原生阅读”按钮添加点击事件监听器**
         nativeReadBtn.addEventListener('click', function() {
             if (currentPdfUrl) {
+                // 处理URL
+                // https://roadmap.sh/backend
+                const match = currentPdfUrl.match(/\/([^/?#]+)\.[^/.]+$/);
+                const nameWithoutExt = match ? match[1] : null;
+
+                console.log(nameWithoutExt); // 输出：backend
                 // 使用 window.open() 在新标签页打开 PDF URL，依赖浏览器原生能力
-                window.open(currentPdfUrl, '_blank');
+                const finalUrl = `https://roadmap.sh/${nameWithoutExt}`;
+                window.open(finalUrl, '_blank');
 
                 // **在新标签页打开后，隐藏选项容器**
                 pdfOptionsContainer.style.display = 'none';

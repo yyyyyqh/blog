@@ -27,10 +27,10 @@ public class RoadmapController {
         List<PdfInfo> pdfList = new ArrayList<>();
         // src/main/resources/static/documents/ 目录下
         pdfList.add(new PdfInfo("前端技术路线图", "/documents/frontend.pdf"));
-        pdfList.add(new PdfInfo("后端技术路线图", "/documents/frontend.pdf"));
-        pdfList.add(new PdfInfo("DevOps 路线图", "/documents/frontend.pdf"));
-        pdfList.add(new PdfInfo("AI 工程师路线图", "/documents/frontend.pdf"));
-        pdfList.add(new PdfInfo("数据分析师路线图", "/documents/frontend.pdf"));
+        pdfList.add(new PdfInfo("后端技术路线图", "/documents/backend.pdf"));
+        pdfList.add(new PdfInfo("DevOps 路线图", "/documents/devops.pdf"));
+        pdfList.add(new PdfInfo("AI 工程师路线图", "/documents/ai-engineer.pdf"));
+        pdfList.add(new PdfInfo("数据分析师路线图", "/documents/data-analyst.pdf"));
 
 
         // 将 PDF 列表添加到 Model 中，名称为 "pdfList"
