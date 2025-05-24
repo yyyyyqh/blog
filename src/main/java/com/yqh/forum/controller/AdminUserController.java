@@ -1,7 +1,9 @@
 package com.yqh.forum.controller; // 请根据您的实际包结构调整
 
 import com.yqh.forum.model.User;
+import com.yqh.forum.service.EmailService;
 import com.yqh.forum.service.UserService; // 假设您已经有了处理用户相关业务逻辑的 UserService
+import com.yqh.forum.service.impl.EmailServiceImpl;
 import lombok.RequiredArgsConstructor; // 如果您使用了 Lombok 的 @RequiredArgsConstructor
 import org.springframework.security.access.prepost.PreAuthorize; // 导入 @PreAuthorize 注解
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -25,6 +27,7 @@ import java.util.List;
 public class AdminUserController {
 
     private final UserService userService; // 注入 UserService，用于后续获取用户数据
+    private final EmailService emailService;
 
     /**
      * 显示用户管理仪表板页面
@@ -43,7 +46,7 @@ public class AdminUserController {
      * 显示用户删除管理列表页面
      * 处理 /admin/users/delete 的 GET 请求
      */
-    @GetMapping("/delete") // 映射到 /admin/users/delete
+    @GetMapping("/delete")
     //也可以单独对  @GetMapping("/delete") 进行权限控制
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     public String showUserDeletionList(Model model) {
@@ -142,8 +145,14 @@ public class AdminUserController {
 
             String newPassword = userService.resetUserPassword(id); // 假设 Service 方法返回新生成的裸密码
 
-            // 添加成功消息
-            // 请根据实际通知用户的方式调整此消息
+            //将密码通过邮件发送给用户
+            User to = userService.findById(id);
+            String username = to.getUsername();
+            String email = to.getEmail();
+
+            emailService.sendTemporaryPasswordEmail(email, username, newPassword);
+
+            // 添加成功消息（传递给thymeleaf视图，视图中通过${successMessage}可以访问）
             redirectAttributes.addFlashAttribute("successMessage", "用户密码已重置！请通过安全方式将新密码通知用户（例如发送邮件）");
 
 

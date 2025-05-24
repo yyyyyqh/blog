@@ -19,4 +19,6 @@ public interface UserService {
     // 重置用户密码的方法
     // 返回 String (新生成的裸密码) 或 void (如果邮件发送等通知逻辑在 Service 内部完成)
     String resetUserPassword(Long userId);
+    //根据用户ID查找用户
+    User findById(Long userId);
 } 

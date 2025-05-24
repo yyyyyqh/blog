@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -136,12 +137,13 @@ public class UserServiceImpl implements UserService {
 
         User user = userOptional.orElseThrow(() -> new UsernameNotFoundException("User not found with ID: " + userId));
 
-        // 2. 生成一个新的随机密码
-        // 这里使用 UUID 生成一个简单的随机字符串作为初始密码示例
-        // 在生产环境中，请确保生成的密码足够复杂和安全
-        //String newRawPassword = UUID.randomUUID().toString().substring(0, 10); // 例如生成一个10个字符的密码
+        // 2. 生成一个新的随机密码（6位数字密码）
+        SecureRandom random = new SecureRandom();
+        int randomNumber = random.nextInt(1000000);
+        // 使用 String.format 来确保数字是6位数，不足6位时在前面补0
+        String newRawPassword = String.format("%06d", randomNumber);
 
-        String newRawPassword = "000000";
+        //String newRawPassword = "000000";
 
         // 3. 编码新密码
         String encodedPassword = passwordEncoder.encode(newRawPassword);
@@ -149,26 +151,25 @@ public class UserServiceImpl implements UserService {
         // 4. 更新用户实体中的密码
         user.setPassword(encodedPassword);
 
-        // 5. 保存更新后的用户实体到数据库
-        userRepository.save(user); // 这会将用户的密码更新到数据库
-
-        // 6. **重要：将新生成的裸密码通过安全方式通知用户（通常是发送邮件）**
-        // **这部分逻辑需要您根据您的邮件发送配置和实现来完成。**
-        // 您需要配置 JavaMailSender，并编写发送邮件的代码。
-        // 例如：
-        // try {
-        //     sendPasswordResetEmail(user.getEmail(), newRawPassword); // 调用发送邮件的方法
-        // } catch (Exception e) {
-        //     // 处理邮件发送失败的情况 - 记录日志或抛出自定义异常
-        //     System.err.println("Failed to send password reset email to " + user.getEmail() + ": " + e.getMessage());
-        //     // **根据您的业务需求决定是否回滚事务或标记重置失败**
-        //     // throw new RuntimeException("密码重置成功，但邮件发送失败。", e); // 示例：如果邮件发送是必须的，可以抛异常
-        // }
-
+        // 5. 保存更新后的用户实体到数据库（将用户的密码更新到数据库）
+        userRepository.save(user);
 
         // **返回新生成的裸密码**
-        // 注意：直接在日志或消息中显示裸密码不安全，通常只在 Service 内部使用并立即发送给用户。
-        // 如果邮件发送成功且 Service 不需要将密码返回给 Controller，可以将此方法的返回类型改为 void。
         return newRawPassword;
     }
-} 
+
+    /**
+     * 根据用户 ID 查找用户
+     * @param userId 用户ID
+     * @return 用户实体
+     */
+    @Override
+    public User findById(Long userId) {
+        // 1. 根据用户 ID 查找用户
+        Optional<User> userOptional = userRepository.findById(userId);
+
+        User user = userOptional.orElseThrow(() -> new UsernameNotFoundException("User not found with ID: " + userId));
+
+        return user;
+    }
+}
