@@ -172,4 +172,27 @@ public class UserServiceImpl implements UserService {
 
         return user;
     }
+
+    @Override
+    public void deleteUserById(Long userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+        // 1. 检查用户是否存在（可选，因为 userRepository.deleteById 如果ID不存在也不会报错）
+        // 但为了能抛出我们自定义的 UserNotFoundException，进行检查是好的。
+        if (!userRepository.existsById(userId)) {
+            //logger.warn("Attempted to delete non-existent user with ID: {}", userId);
+        }
+
+        // 2. 执行删除操作
+        try {
+            userRepository.deleteById(userId);
+            //logger.info("用户 (ID: {}) 已成功删除。", userId);
+        } catch (Exception e) {
+            // 例如，处理 DataIntegrityViolationException，如果用户有关联数据且无法级联删除
+            //logger.error("删除用户 (ID: {}) 时发生错误: {}", userId, e.getMessage(), e);
+            // 可以根据具体异常类型决定是否重新抛出或包装成自定义业务异常
+            throw new RuntimeException("删除用户 (ID: " + userId + ") 失败，可能是由于数据完整性约束。", e);
+        }
+    }
 }

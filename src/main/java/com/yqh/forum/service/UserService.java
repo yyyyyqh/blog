@@ -21,4 +21,5 @@ public interface UserService {
     String resetUserPassword(Long userId);
     //根据用户ID查找用户
     User findById(Long userId);
+    void deleteUserById(Long userId);
 } 

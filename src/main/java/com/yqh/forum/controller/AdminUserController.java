@@ -61,43 +61,25 @@ public class AdminUserController {
         return "admin/users/delete-list"; // 返回对应的 Thymeleaf 模板文件路径
     }
 
-    // /**
-    //  * 显示用户密码重置管理列表页面
-    //  * 处理 /admin/users/reset-password 的 GET 请求
-    //  */
-    // @GetMapping("/reset-password")
-    // public String showPasswordResetList(Model model) {
-    //     // 获取所有用户列表，添加到 Model
-    //     // List<User> users = userService.getAllUsers();
-    //     // model.addAttribute("users", users);
-    //     return "admin/users/reset-password-list"; // 返回对应的 Thymeleaf 模板文件路径
-    // }
+
 
     // --- 后续我们还将在这里添加处理实际用户删除、密码重置等 POST 请求的方法 ---
 
-    // /**
-    //  * 处理用户删除请求
-    //  * 处理 /admin/users/{id}/delete 的 POST 请求
-    //  */
-    // @PostMapping("/{id}/delete")
-    // public String deleteUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-    //     // 调用 UserService 执行用户删除逻辑
-    //     // userService.deleteUserById(id);
-    //     // redirectAttributes.addFlashAttribute("successMessage", "用户删除成功！");
-    //     // return "redirect:/admin/users/delete"; // 重定向回用户删除列表页
-    // }
+     /**
+      * 处理用户删除请求
+      * 处理 /admin/users/{id}/delete 的 POST 请求
+      */
+     @PostMapping("/{id}/delete")
+     public String deleteUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+         // 调用 UserService 执行用户删除逻辑
+          userService.deleteUserById(id);
+         // redirectAttributes.addFlashAttribute("successMessage", "用户删除成功！");
+         // return "redirect:/admin/users/delete"; // 重定向回用户删除列表页
 
-    // /**
-    //  * 处理用户密码重置请求
-    //  * 处理 /admin/users/{id}/reset-password 的 POST 请求
-    //  */
-    // @PostMapping("/{id}/reset-password")
-    // public String resetUserPassword(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-    //     // 调用 UserService 执行密码重置逻辑（生成新密码，更新数据库，发送邮件等）
-    //     // userService.resetUserPassword(id); // 您需要在 UserService 中实现此方法
-    //     // redirectAttributes.addFlashAttribute("successMessage", "用户密码已重置！新密码已发送到用户邮箱。"); // 或其他通知方式
-    //     // return "redirect:/admin/users/reset-password"; // 重定向回密码重置列表页
-    // }
+         return "redirect:/admin/users/delete";
+     }
+
+
 
     /**
      * 显示用户密码重置管理列表页面
