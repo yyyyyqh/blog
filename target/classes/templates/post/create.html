@@ -222,8 +222,8 @@
                             console.log("生成 Markdown 图片链接，用于插入编辑器:", markdownImgTag);
 
                             // **新增：将生成的 Markdown 图片链接插入到 EasyMDE 编辑器中**
-                            if (typeof easyMDEInstance !== 'undefined' && easyMDEInstance.codemirror) {
-                                easyMDEInstance.codemirror.replaceSelection(markdownImgTag + '\n');
+                            if (typeof easymde !== 'undefined' && easymde.codemirror) {
+                                easymde.codemirror.replaceSelection(markdownImgTag + '\n');
                             } else {
                                 console.warn("EasyMDE 实例未找到，无法插入 Markdown 链接。");
                                 contentTextarea.value += markdownImgTag + '\n';
