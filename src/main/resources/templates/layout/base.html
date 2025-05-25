@@ -20,8 +20,13 @@
 <body>
     <!-- 导航栏-->
     <!---->
-    <nav class="navbar navbar-expand-lg navbar-dark"
-         th:classappend="${#authentication.principal != null and #authorization.expression('hasRole(''ROLE_ADMIN'')')} ? 'bg-danger' : 'bg-dark'">
+    <!--<nav class="navbar navbar-expand-lg navbar-dark"-->
+    <!--     th:classappend="${#authentication.principal != null and #authorization.expression('hasRole(''ROLE_ADMIN'')')} ? 'bg-danger' : 'bg-dark'">-->
+    <nav class="navbar navbar-expand-lg"
+         th:classappend="${!#authorization.expression('isAuthenticated()')} ? 'navbar-light bg-warning' : (
+                ${#authorization.expression('hasRole(''ROLE_ADMIN'')')} ? 'navbar-dark bg-danger' : 'navbar-dark bg-dark'
+            )
+         ">
         <div class="container">
             <a class="navbar-brand" href="/">论坛系统</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
