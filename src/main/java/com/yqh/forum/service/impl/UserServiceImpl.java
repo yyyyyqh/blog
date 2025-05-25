@@ -6,6 +6,7 @@ import com.yqh.forum.model.User;
 import com.yqh.forum.repository.UserRepository;
 import com.yqh.forum.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,12 +20,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 @RequiredArgsConstructor // Lombok 注解，自动生成构造函数
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class); // 将 YourClassName.class 替换为您的实际类名.class
+
 
     //注册新用户
     @Override
@@ -181,18 +188,21 @@ public class UserServiceImpl implements UserService {
         // 1. 检查用户是否存在（可选，因为 userRepository.deleteById 如果ID不存在也不会报错）
         // 但为了能抛出我们自定义的 UserNotFoundException，进行检查是好的。
         if (!userRepository.existsById(userId)) {
-            //logger.warn("Attempted to delete non-existent user with ID: {}", userId);
+            logger.warn("Attempted to delete non-existent user with ID: {}", userId);
         }
 
         // 2. 执行删除操作
         try {
             userRepository.deleteById(userId);
-            //logger.info("用户 (ID: {}) 已成功删除。", userId);
-        } catch (Exception e) {
-            // 例如，处理 DataIntegrityViolationException，如果用户有关联数据且无法级联删除
-            //logger.error("删除用户 (ID: {}) 时发生错误: {}", userId, e.getMessage(), e);
-            // 可以根据具体异常类型决定是否重新抛出或包装成自定义业务异常
-            throw new RuntimeException("删除用户 (ID: " + userId + ") 失败，可能是由于数据完整性约束。", e);
+            logger.info("用户 (ID: {}) 已成功删除。", userId);
+        } catch (DataIntegrityViolationException e) { // 显式捕获 DataIntegrityViolationException
+            logger.warn("删除用户 (ID: {}) 失败，存在数据完整性约束: {}", userId, e.getMessage());
+            // 直接重新抛出，让 Controller 层的特定 catch 块来处理它，或者包装成一个自定义的业务异常
+            throw e; // 或者 throw new YourBusinessRuleException("该用户尚有关联数据，无法删除。", e);
+        } catch (Exception e) { // 捕获其他所有预料之外的异常
+            logger.error("删除用户 (ID: {}) 时发生未知错误: {}", userId, e.getMessage(), e);
+            // 对于其他未知错误，可以抛出通用运行时异常
+            throw new RuntimeException("删除用户 (ID: " + userId + ") 时发生了一个未知错误。", e);
         }
     }
 }
