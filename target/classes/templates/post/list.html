@@ -26,7 +26,7 @@
     <!--分类目录-->
     <!--在"我的帖子"中不显示分类目录-->
     <div class="row">
-        <div class="col-md-3" th:if="${!isMyPostsView}">
+        <div class="col-md-3 d-none d-md-block" th:if="${!isMyPostsView}">
             <div class="card mb-4">
                 <!--分类列表标题-->
                 <div class="card-header">
@@ -85,15 +85,16 @@
             <!--分页控制-->
             <nav th:if="${posts.totalPages > 1}" class="mt-4">
                 <ul class="pagination justify-content-center">
-                    <!--上一页-->
                     <li class="page-item" th:classappend="${posts.first} ? 'disabled'">
-                        <!--根据所有帖子和我的帖子，不同页面不同处理-->
                         <a class="page-link"
                            th:href="${isMyPostsView} ? @{/post/my(page=${posts.number - 1})} : @{/post(page=${posts.number - 1}, categoryId=${categoryId})}">
-                            上一页
+                            <span class="d-inline d-sm-none">
+                                <i class="fa fa-angle-left" aria-hidden="true"></i>
+                            <span class="visually-hidden">上一页</span> </span>
+                            <span class="d-none d-sm-inline">上一页</span>
                         </a>
                     </li>
-                    <!--数字选择-->
+
                     <li class="page-item" th:each="i : ${#numbers.sequence(0, posts.totalPages - 1)}"
                         th:classappend="${i == posts.number} ? 'active'">
                         <a class="page-link"
@@ -101,11 +102,18 @@
                            th:text="${i + 1}">
                         </a>
                     </li>
-                    <!--下一页-->
+
                     <li class="page-item" th:classappend="${posts.last} ? 'disabled'">
                         <a class="page-link"
                            th:href="${isMyPostsView} ? @{/post/my(page=${posts.number + 1})} : @{/post(page=${posts.number + 1}, categoryId=${categoryId})}">
-                            下一页
+                            <!--大屏隐藏，小屏显示-->
+                            <span class="d-inline d-sm-none">
+                                <!--fontawesome的右箭头图标-->
+                                <i class="fa fa-angle-right" aria-hidden="true"></i>
+                                <!--（为视障用户提供支持）文本在视觉上是隐藏的，屏幕阅读器仍然会读取这个 visually-hidden 的文本-->
+                                <span class="visually-hidden">下一页</span> </span>
+                            <!--小屏不显示，大屏显示-->
+                            <span class="d-none d-sm-inline">下一页</span>
                         </a>
                     </li>
                 </ul>

@@ -1,15 +1,36 @@
-<!--/post/{id}-->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="layout/base :: head">
     <title th:text="${post.title}">帖子详情</title>
+    <style>
+        #table-of-contents-container.sticky-top {
+            top: 70px; /* Adjust this value based on your navbar height + desired offset */
+            align-self: flex-start; /* Important for sticky positioning within flex/grid */
+            max-height: calc(100vh - 80px); /* Example max height, adjust as needed */
+            overflow-y: auto; /* Allow TOC to scroll if it's too long */
+        }
+        /* Style for TOC links for better visual hierarchy */
+        #toc-list .nav-link {
+            padding-top: .2rem;
+            padding-bottom: .2rem;
+            font-size: 0.9rem; /* Slightly smaller font for TOC */
+        }
+        #toc-list .nav-link.active {
+            font-weight: bold;
+            color: var(--bs-primary); /* Or your preferred active color */
+        }
+        /* Indentation examples - these are just examples, Bootstrap ms- classes will be used by JS */
+        /* #toc-list .h2-link { margin-left: 0; } */
+        /* #toc-list .h3-link { margin-left: 15px; } */
+        /* #toc-list .h4-link { margin-left: 30px; } */
+    </style>
 </head>
 <body>
 <div th:replace="layout/base :: nav"></div>
 
 <div class="container mt-4">
     <div class="row">
-        <div class="col">
+        <div class="col-lg-9 col-md-8">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a th:href="@{/post}">帖子列表</a></li>
@@ -35,11 +56,9 @@
                             </small>
                         </div>
                     </div>
-                    <div class="card-text" th:utext="${postHtmlContent}"></div>
+                    <div class="card-text" id="post-article-content" th:utext="${postHtmlContent}"></div>
 
-                    <!--帖子拥有者可以编辑帖子-->
                     <div class="mt-3" sec:authorize="isAuthenticated() and #authentication.name == #vars.post.author.username">
-                        <!--点击编辑，会跳转/post/{id}/edit-->
                         <a th:href="@{/post/{id}/edit(id=${post.id})}" class="btn btn-primary btn-sm">编辑</a>
                         <form th:action="@{/post/{id}/delete(id=${post.id})}" method="post" class="d-inline">
                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('确定要删除这篇帖子吗？')">删除</button>
@@ -48,11 +67,12 @@
                 </div>
             </div>
 
-            <!--评论区-->
             <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">评论</h5>
-                </div>
+            </div>
+
+            <div class="card mt-4"> <div class="card-header">
+                <h5 class="mb-0">评论</h5>
+            </div>
                 <div class="card-body">
                     <div sec:authorize="isAuthenticated()">
                         <form th:action="@{/comment/create}" method="post">
@@ -64,11 +84,10 @@
                         </form>
                     </div>
                     <div sec:authorize="!isAuthenticated()" class="alert alert-info">
-                        请<a th:href="@{/login}">登录</a>后发表评论
+                        请<a th:href="@{/user/login}">登录</a>后发表评论
                     </div>
 
                     <div class="mt-4">
-                        <!--通过thymeleaf的each语句渲染-->
                         <div th:each="comment : ${comments}" class="card mb-3">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between">
@@ -93,35 +112,147 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-lg-3 col-md-4">
+            <nav id="table-of-contents-container" class="sticky-top">
+                <h5 class="pt-3">目录</h5>
+                <ul id="toc-list-ul" class="nav nav-pills flex-column">
+                </ul>
+            </nav>
+        </div>
     </div>
+
+
 </div>
+
 
 <div th:replace="layout/base :: footer"></div>
 
-<script th:inline="javascript">
-    function editComment(commentId) {
-        const content = prompt('请输入新的评论内容：');
-        if (content) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `/comment/${commentId}/edit`;
-
-            const contentInput = document.createElement('input');
-            contentInput.type = 'hidden';
-            contentInput.name = 'content';
-            contentInput.value = content;
-
-            const postIdInput = document.createElement('input');
-            postIdInput.type = 'hidden';
-            postIdInput.name = 'postId';
-            postIdInput.value = /*[[${post.id}]]*/ ''; // Accessing Thymeleaf variable
-
-            form.appendChild(contentInput);
-            form.appendChild(postIdInput);
-            document.body.appendChild(form);
-            form.submit();
-        }
+<script th:inline="javascript" th:if="${post != null}"> // Added th:if to ensure post.id is available for editComment
+function editComment(commentId) {
+    // ... (your existing editComment function) ...
+    // Ensure postIdInput.value access is safe
+    const postIdValue = /*[[${post?.id}]]*/ null;
+    if (postIdValue === null) {
+        console.error("Post ID is not available for editing comment.");
+        return;
     }
+    // ... rest of your function using postIdValue for postIdInput.value ...
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/comment/${commentId}/edit`;
+
+    const contentInput = document.createElement('input');
+    contentInput.type = 'hidden';
+    contentInput.name = 'content';
+    contentInput.value = content; // Assuming 'content' is defined from prompt
+
+    const postIdInput = document.createElement('input');
+    postIdInput.type = 'hidden';
+    postIdInput.name = 'postId';
+    postIdInput.value = postIdValue;
+
+    form.appendChild(contentInput);
+    form.appendChild(postIdInput);
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const contentElement = document.getElementById('post-article-content');
+        const tocListULElement = document.getElementById('toc-list-ul'); // Target the UL
+        const tocContainer = document.getElementById('table-of-contents-container');
+
+        if (!contentElement || !tocListULElement || !tocContainer) {
+            console.warn('TOC critical elements not found. Skipping TOC generation.');
+            if(tocContainer) tocContainer.style.display = 'none';
+            return;
+        }
+
+        const headingSelectors = 'h1, h2, h3, h4, h5, h6';
+        const headings = Array.from(contentElement.querySelectorAll(headingSelectors)); // Convert NodeList to Array
+
+        if (headings.length === 0) {
+            tocContainer.style.display = 'none'; // Hide TOC container if no headings
+            return;
+        }
+
+        headings.forEach(function (heading) {
+            const id = heading.id;
+            let text = heading.textContent.trim();
+            const level = parseInt(heading.tagName.substring(1));
+
+            if (!id) {
+                console.warn('Skipping heading without ID:', heading.textContent);
+                return;
+            }
+            if (!text) {
+                // Try to get text from child nodes if textContent is empty but children exist (e.g. if <a> tag is inside by some extension)
+                if (heading.hasChildNodes()) {
+                    // Iterate over child nodes to build text, excluding potential anchorlink <a> tags if they are just symbols
+                    let tempText = '';
+                    heading.childNodes.forEach(child => {
+                        if (child.nodeType === Node.TEXT_NODE) {
+                            tempText += child.textContent;
+                        } else if (child.nodeType === Node.ELEMENT_NODE && child.tagName.toLowerCase() !== 'a') {
+                            // Include text from other elements but not from anchors (to avoid duplicating link text)
+                            // This might need adjustment if your headings have complex structures
+                            tempText += child.textContent;
+                        }
+                    });
+                    text = tempText.trim();
+                }
+                if (!text) return; // Still no text, skip
+            }
+
+
+            const listItem = document.createElement('li');
+            listItem.classList.add('nav-item');
+
+            const link = document.createElement('a');
+            link.classList.add('nav-link');
+            link.href = '#' + id;
+            link.textContent = text;
+
+            // Indentation based on heading level (H1 no indent, H2 indent 1, H3 indent 2, etc.)
+            // Bootstrap margin start classes: ms-1, ms-2, ms-3, ms-4, ms-5
+            if (level > 1) { // H1 has level 1, H2 has level 2 etc.
+                const indentClassLevel = Math.min(level, 5); // Bootstrap has up to ms-5, use (level-1) for 0,1,2..
+                // or level for 1,2,3...
+                // Let's use level directly, so H2 gets ms-2.
+                link.classList.add('ms-' + indentClassLevel);
+            }
+
+            // Smooth scroll on click
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetElement = document.getElementById(id); // More reliable than querySelector for IDs
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                    // Optionally update URL hash without page jump.
+                    // Be careful if using Bootstrap scrollspy, as it might handle this.
+                    // window.history.pushState(null, null, '#' + id);
+                }
+            });
+
+            listItem.appendChild(link);
+            tocListULElement.appendChild(listItem);
+        });
+
+        // Optional: Setup Bootstrap Scrollspy
+        // 1. Add to your <body> tag in view.html:
+        //    data-bs-spy="scroll" data-bs-target="#toc-list-ul" data-bs-offset="[your_navbar_height_plus_some_offset]"
+        //    e.g. data-bs-offset="100"
+        // 2. Ensure Bootstrap JS is loaded.
+        // Example body tag: <body data-bs-spy="scroll" data-bs-target="#toc-list-ul" data-bs-offset="100">
+        // Bootstrap will then automatically add 'active' class to the nav-link elements in #toc-list-ul
+        // as you scroll. The CSS in <style> block above will highlight it.
+        // No extra JS needed for scrollspy if attributes are set on body.
+    });
 </script>
 </body>
 </html>

@@ -8,6 +8,7 @@ import com.yqh.forum.repository.UserRepository; // **新增导入 UserRepository
 import com.yqh.forum.service.CategoryService;
 import com.yqh.forum.service.CommentService;
 import com.yqh.forum.service.PostService;
+import com.yqh.forum.service.util.HtmlHeadingIdUtil;
 import com.yqh.forum.service.util.MarkdownUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -191,12 +192,16 @@ public class PostController {
             return "error/404";
         }
 
+
+        //解析markdown
         String markdownContent = post.getContent();
         // 请确保 MarkdownUtil 及其 convertMarkdownToHtml 方法已正确实现且可用
-        String htmlContent = com.yqh.forum.service.util.MarkdownUtil.convertMarkdownToHtml(markdownContent); // Assuming package path
+        String rawHtmlContent = com.yqh.forum.service.util.MarkdownUtil.convertMarkdownToHtml(markdownContent); // Assuming package path
+        String htmlContentWithIds = HtmlHeadingIdUtil.addIdsToHtmlHeadings(rawHtmlContent);
 
+        System.out.println(htmlContentWithIds);
         model.addAttribute("post", post);
-        model.addAttribute("postHtmlContent", htmlContent);
+        model.addAttribute("postHtmlContent", htmlContentWithIds);
 
         //评论列表
         Pageable pageable = PageRequest.of(0, 10);
