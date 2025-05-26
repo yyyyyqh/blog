@@ -141,6 +141,16 @@ body {
     box-sizing: border-box;
 }
 
+/* 解决帖子列表摘要内容溢出问题 */
+.list-group-item p.mb-1 {
+    overflow-wrap: break-word;  /* 允许在单词内部断开，以防止溢出 */
+    word-wrap: break-word;      /* overflow-wrap 的旧别名，增强兼容性 */
+    word-break: break-word;     /* 另一种控制断词的方式，通常 break-word 比 break-all 更友好 */
+    /* 如果还想处理极端情况，可以加上 max-width */
+    /* max-width: 100%; */ /* 通常父元素会限制宽度，但可以显式声明 */
+}
+
+
 /* --- 表格目录 (TOC) 样式 --- */
 
 /* 确保 HTML 有平滑滚动效果 (如果其他地方没有设置) */
