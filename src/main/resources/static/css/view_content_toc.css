@@ -1,0 +1,89 @@
+/* 确保 HTML 和 Body 有平滑滚动效果 */
+html {
+    scroll-behavior: smooth;
+}
+
+/* 目录大纲侧边栏容器样式 */
+.toc-sidebar {
+    position: sticky;       /* 使用 sticky 定位，以便在滚动时固定 */
+    top: 70px;             /* 距离顶部距离，根据您的固定导航栏高度调整 */
+    align-self: flex-start;/* 确保在 flex 容器中正确对齐 */
+    width: 100%;           /* 宽度将由 Bootstrap 列决定，这里设为100%填充其列 */
+    max-height: calc(100vh - 90px); /* 最大高度，预留上下边距 */
+    overflow-y: auto;      /* 内容超出时显示垂直滚动条 */
+    background-color: #f8f9fa; /* 背景色 (可以调整为 #fff 或其他) */
+    border: 1px solid #dee2e6;  /* 边框 */
+    padding: 15px;         /* 内边距 */
+    border-radius: .25rem;     /* 圆角 */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* 轻微阴影 */
+}
+
+.toc-sidebar h5 {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+/* 目录列表整体样式 */
+.toc-sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* 目录列表项样式 */
+.toc-sidebar li {
+    margin-bottom: 5px;
+    line-height: 1.5;
+}
+
+/* 多级列表缩进和样式 */
+.toc-sidebar ul ul {
+    padding-left: 15px;   /* 左侧缩进 */
+    margin-top: 5px;
+}
+.toc-sidebar ul ul ul { padding-left: 15px; margin-top: 5px; }
+.toc-sidebar ul ul ul ul { padding-left: 15px; margin-top: 5px; }
+.toc-sidebar ul ul ul ul ul { padding-left: 15px; margin-top: 5px; }
+
+
+/* 目录链接样式 */
+.toc-sidebar a {
+    text-decoration: none;
+    color: #495057;        /* 链接颜色 */
+    display: block;
+    font-size: 0.875em;     /* 字体大小 */
+    white-space: normal;
+    word-break: break-word;
+    padding: .25rem .5rem; /* 链接内边距 */
+    border-radius: .2rem;
+    border-left: 3px solid transparent; /* 左侧高亮边框的占位 */
+}
+
+/* 鼠标悬停时的链接样式 */
+.toc-sidebar a:hover {
+    color: #007bff;
+    background-color: #e9ecef;
+}
+
+/* 高亮时的目录链接样式 (由 JavaScript 添加 'active' 类) */
+.toc-sidebar a.active {
+    font-weight: bold;
+    color: #007bff;
+    border-left-color: #007bff;
+    background-color: #ddeeff;
+}
+
+/* 响应式调整 (处理小屏幕时的布局) */
+/* Bootstrap的列系统 (col-lg-*, col-md-*) 应该会自动处理堆叠。
+   这里的 @media query 是从您的示例中带来的，主要用于调整 .toc-sidebar 的固定行为。
+   如果Bootstrap列不能满足，可以取消注释并调整。
+*/
+@media (max-width: 991.98px) { /* Bootstrap lg 断点以下 */
+    .toc-sidebar {
+        position: static; /* 取消固定/粘性定位，恢复正常文档流 */
+        width: auto;
+        max-height: none;
+        margin-top: 20px;
+    }
+    /* 主内容列和目录列在中小屏幕下会自然堆叠成100%宽度，无需额外CSS */
+}

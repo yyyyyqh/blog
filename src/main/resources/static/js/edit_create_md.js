@@ -1,0 +1,251 @@
+// 等待 DOM 加载完成
+document.addEventListener("DOMContentLoaded", function() {
+    // **EasyMDE 的配置和初始化**
+    const easymde = new EasyMDE({
+        element: document.getElementById('content'),
+        spellChecker: false, // 关闭拼写检查
+        autoDownloadFontAwesome: false,
+
+    });
+
+    // easymde.codemirror.setOption("theme", "monokai");
+
+    // **获取 EasyMDE 实例**
+    const easyMDEInstance = easymde;
+
+
+    // **获取图片上传相关页面元素**
+    const uploadButton = document.getElementById('uploadImageButton'); // 上传按钮
+    const fileInput = document.getElementById('imageFileInput');       // 隐藏的文件输入框
+    const contentTextarea = document.getElementById('content');       // 您的内容文本框 (EasyMDE 目标)
+    const uploadedImagesContainer = document.getElementById('uploadedImagesContainer'); // 显示上传信息的容器
+    const imageSizeInputBlock = document.getElementById('imageSizeInputBlock'); // 图片大小输入区域
+    const imageWidthInput = document.getElementById('imageWidthInput');     // 宽度输入框
+
+    // 用于存储用户选择的图片文件，以便在用户确定宽度后上传
+    let selectedFile = null;
+    // 用于存储原始图片尺寸，以便计算预设宽度
+    let originalImageWidth = 0;
+    let originalImageHeight = 0;
+
+    // **确保找到了所有需要的元素和 EasyMDE 实例**
+    if (uploadButton && fileInput && contentTextarea && uploadedImagesContainer && imageSizeInputBlock && imageWidthInput && easyMDEInstance) {
+
+        // **上传图片按钮的点击事件监听器 (双重功能)**
+        uploadButton.addEventListener('click', function() {
+            if (imageSizeInputBlock.style.display === 'none') {
+                // 如果大小输入区域隐藏，说明用户点击按钮是为了选择文件
+                fileInput.click(); // 触发隐藏的文件输入框点击事件
+            } else {
+                // 如果大小输入区域显示，说明用户已选择文件并设置了宽度，点击是为了触发上传
+                if (selectedFile) {
+                    const desiredWidth = parseInt(imageWidthInput.value, 10);
+                    if (!isNaN(desiredWidth) && desiredWidth > 0) {
+                        triggerUpload(selectedFile, desiredWidth);
+                    } else {
+                        console.warn("无效的宽度输入，无法上传图片。请检查输入值。");
+                    }
+                } else {
+                    console.warn("没有选中的文件可供上传。");
+                }
+            }
+        });
+
+        // **文件输入框的 change 事件监听器 (选择文件后执行)**
+        fileInput.addEventListener('change', function() {
+            const file = fileInput.files[0];
+            if (file) {
+                selectedFile = file;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        originalImageWidth = img.naturalWidth;
+                        originalImageHeight = img.naturalHeight;
+                        console.log("图片的原始尺寸:", originalImageWidth, "x", originalImageHeight);
+                        imageSizeInputBlock.style.display = 'block';
+                        imageWidthInput.value = Math.min(originalImageWidth, 600); // 预设宽度，最大 600
+                        imageWidthInput.min = 1;
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                selectedFile = null;
+                imageSizeInputBlock.style.display = 'none';
+                fileInput.value = '';
+            }
+        });
+
+        /**
+         * 触发上传
+         * 上传成功后，调用addUploadedImageInfo出现复制/预览按钮
+         * @param file
+         * @param width
+         */
+
+        // **函数：执行实际的文件上传逻辑**
+        // 接收文件对象和用户指定的宽度作为参数
+        function triggerUpload(file, width) {
+            uploadButton.disabled = true; // 上传过程中禁用按钮
+
+            const formData = new FormData();
+            formData.append('image', file); // 'image' 与后端 @RequestParam("image") 同名
+
+            fetch('/upload/image', { method: 'POST', body: formData })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error('图片上传失败: ' + text); });
+                    }
+                    // 假设后端返回的是 JSON，格式如 [ "java.util.HashMap", { "url": "..." } ]
+                    return response.json();
+                })
+                .then(data => {
+                    // *** 关键修正点：从数组的第二个元素中获取实际的 URL 对象 ***
+                    const actualData = Array.isArray(data) && data.length > 1 ? data[1] : data; // <-- 确保这行存在
+
+                    if (actualData && actualData.url) { // 使用 actualData 进行判断
+                        const imageUrl = actualData.url; // 获取后端返回的图片 Web URL
+                        const filename = file.name; // 获取文件名作为 alt 文本或链接文本
+                        // alert("图片上传成功！")
+
+                        // **生成 Markdown 格式的图片链接**
+                        // 点击上传图片时，插入的图片链接格式为 ![图片名](图片URL)
+                        const markdownImgTag = `![${filename}](${imageUrl})`;
+                        console.log("生成 Markdown 图片链接，用于插入编辑器:", markdownImgTag);
+
+                        // **新增：将生成的 Markdown 图片链接插入到 EasyMDE 编辑器中**
+                        if (typeof easyMDEInstance !== 'undefined' && easyMDEInstance.codemirror) {
+                            easyMDEInstance.codemirror.replaceSelection(markdownImgTag + '\n');
+                        } else {
+                            console.warn("EasyMDE 实例未找到，无法插入 Markdown 链接。");
+                            contentTextarea.value += markdownImgTag + '\n';
+                        }
+
+                        // **显示图片 Web URL 和按钮 (在下方，与编辑器分离)**
+                        //将图片的地址传递给函数
+                        const htmlImgTagForCopy = `![${filename}](${imageUrl})`;
+                        addUploadedImageInfo(imageUrl, htmlImgTagForCopy);
+
+                    } else {
+                        throw new Error('服务器返回数据格式不正确：缺少URL信息。'); // <-- 确保这里是新的错误信息
+                    }
+                })
+                .catch(error => {
+                    console.error('上传错误:', error);
+                })
+                .finally(() => {
+                    uploadButton.disabled = false;
+                    imageSizeInputBlock.style.display = 'none';
+                    selectedFile = null;
+                    fileInput.value = '';
+                });
+        } // triggerUpload 函数结束
+
+
+        /**
+         * 动态添加上传图片信息、复制按钮和预览按钮
+         * @param imageUrl
+         * @param linkToCopy
+         */
+        function addUploadedImageInfo(imageUrl, linkToCopy) {
+            // 创建一个 div 用于包裹信息
+            const imageEntryDiv = document.createElement('div');
+            // 添加 d-flex 和 align-items-center 类，使内部元素水平居中对齐
+            imageEntryDiv.classList.add('mb-2', 'd-flex', 'align-items-center');
+
+            // 创建一个 span 显示图片 Web URL (或者文件名)
+            const urlSpan = document.createElement('span');
+            const filename = imageUrl.substring(imageUrl.lastIndexOf('/') + 1); // 提取文件名
+            urlSpan.textContent = filename; // 显示文件名
+            urlSpan.title = imageUrl; // 鼠标悬停时显示完整 URL
+            // 添加样式类：me-2 (右边距), d-inline-block (行内块), text-truncate (文本溢出显示省略号)
+            urlSpan.classList.add('me-2', 'd-inline-block', 'text-truncate');
+            urlSpan.style.maxWidth = '250px'; // 控制显示的最大宽度
+
+            // 创建一个复制按钮
+            const copyButton = document.createElement('button');
+            copyButton.type = 'button';
+            // 添加 Bootstrap 按钮样式类：btn, btn-outline-primary (描边主色), btn-sm (小尺寸)
+            // 添加 me-2 类，在复制按钮右边添加间距，与预览按钮分隔
+            copyButton.classList.add('btn', 'btn-outline-primary', 'btn-sm', 'me-2');
+            copyButton.textContent = '复制链接'; // 按钮文本
+
+            // 创建一个预览按钮
+            const previewButton = document.createElement('button');
+            previewButton.type = 'button';
+            // 添加 Bootstrap 按钮样式类：btn, btn-outline-info (描边信息色), btn-sm (小尺寸)
+            previewButton.classList.add('btn', 'btn-outline-info', 'btn-sm');
+            previewButton.textContent = '预览图片'; // 按钮文本
+
+            // **为复制按钮添加点击事件监听器**
+            copyButton.addEventListener('click', function() {
+                navigator.clipboard.writeText(linkToCopy)
+                    .then(() => {
+                        console.log('HTML img 标签已复制到剪贴板:', linkToCopy);
+                        // 复制成功后的视觉反馈 (文本和颜色变化)
+                        copyButton.textContent = '已复制！';
+                        copyButton.classList.remove('btn-outline-primary');
+                        copyButton.classList.add('btn-success');
+
+                        // 短暂延迟后恢复按钮文本和颜色
+                        setTimeout(() => {
+                            copyButton.textContent = '复制链接';
+                            copyButton.classList.remove('btn-success');
+                            copyButton.classList.add('btn-outline-primary');
+                        }, 2000);
+
+                    })
+                    .catch(err => {
+                        // 复制失败的处理
+                        console.error('复制到剪贴板失败:', err);
+                        copyButton.textContent = '复制失败！';
+                        copyButton.classList.remove('btn-outline-primary');
+                        copyButton.classList.add('btn-danger');
+                        // 可选：向用户显示失败提示
+                    });
+            });
+
+            // **为预览按钮添加点击事件监听器**
+            previewButton.addEventListener('click', function() {
+                const previewModal = document.getElementById('imagePreviewModal'); // 根据模态框的 ID 获取元素
+                const modalImage = document.getElementById('imagePreviewModalImage'); // 根据模态框内 img 标签的 ID 获取元素
+
+                if (previewModal && modalImage) {
+                    modalImage.src = imageUrl; // 设置模态框中图片的 src 属性为上传图片的 URL
+                    // 确保 Bootstrap 的 JavaScript 文件已加载并且 bootstrap.Modal 可用
+                    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                        const modal = new bootstrap.Modal(previewModal);
+                        modal.show(); // 显示模态框
+                    } else {
+                        console.error("Bootstrap Modal JavaScript is not loaded correctly or 'bootstrap.Modal' is not defined.");
+                    }
+
+                } else {
+                    console.error("未找到图片预览所需的模态框元素！请检查 HTML 中是否存在 id='imagePreviewModal' 和 id='imagePreviewModalImage' 的元素。");
+                }
+            });
+
+            // **将创建的元素添加到容器 div 中**
+            imageEntryDiv.appendChild(urlSpan);      // 添加文件名/URL span
+            imageEntryDiv.appendChild(copyButton);   // 添加复制按钮
+            imageEntryDiv.appendChild(previewButton); // 添加预览按钮
+
+            // 将包裹所有信息的 div 添加到页面上的容器中
+            uploadedImagesContainer.appendChild(imageEntryDiv);
+        }
+
+    } else {
+        console.error("未找到上传图片所需的 HTML 元素或 EasyMDE 实例！请检查元素 ID 和 EasyMDE 初始化。");
+        // 打印具体缺失的元素，方便调试
+        if (!uploadButton) console.error("Missing element: #uploadImageButton");
+        if (!fileInput) console.error("Missing element: #imageFileInput");
+        if (!contentTextarea) console.error("Missing element: #content");
+        if (!uploadedImagesContainer) console.error("Missing element: #uploadedImagesContainer");
+        if (!imageSizeInputBlock) console.error("Missing element: #imageSizeInputBlock");
+        if (!imageWidthInput) console.error("Missing element: #imageWidthInput");
+        // EasyMDE 实例的检查可以在其初始化后进行
+        if (typeof easymde === 'undefined') console.error("EasyMDE variable is not defined. Check if EasyMDE is initialized globally.");
+        if (easymde && !easyMDEInstance) console.error("EasyMDE instance is null or not accessible.");
+    }
+}); // DOMContentLoaded 结束
