@@ -1,4 +1,4 @@
-package com.yqh.forum.config;
+package com.yqh.forum.config.init;
 
 import com.yqh.forum.model.Category;
 import com.yqh.forum.repository.CategoryRepository;

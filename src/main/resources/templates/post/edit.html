@@ -97,9 +97,6 @@
         });
 
         // **获取 EasyMDE 实例**
-        // EasyMDE 初始化后，其核心实例通常会存储在其关联的 DOM 元素的 data 属性中，
-        // 或者如果 'easymde' 是一个全局变量，可以直接访问。
-        // 我们假定 'easymde' 变量在这里是可访问的。
         const easyMDEInstance = easymde;
 
 
@@ -233,12 +230,10 @@
 
 
             /**
-             * 添加上传图片信息、复制按钮和预览按钮
+             * 动态添加上传图片信息、复制按钮和预览按钮
              * @param imageUrl
              * @param linkToCopy
              */
-            // **函数：动态添加上传图片信息、复制按钮和预览按钮**
-            // 这个函数用于在页面下方的容器中显示上传成功的图片信息和操作按钮
             function addUploadedImageInfo(imageUrl, linkToCopy) {
                 // 创建一个 div 用于包裹信息
                 const imageEntryDiv = document.createElement('div');

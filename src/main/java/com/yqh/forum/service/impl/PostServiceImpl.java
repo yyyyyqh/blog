@@ -35,18 +35,17 @@ public class PostServiceImpl implements PostService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    //对摘要显示的内容进行过滤
-    //1.过滤了markdown格式的图片2.过滤html图片标记
+    //过滤图片
     private static final Pattern IMAGE_PATTERN = Pattern.compile(
             "!\\[.*?\\]\\(.*?\\)|<img[^>]*?src=[\"'](.*?)\"'.*?>|#",
             Pattern.CASE_INSENSITIVE
     );
-
-    //过滤Markdown标题的#符号
+    //过滤#号
     private static final Pattern MARKDOWN_HEADING_PATTERN = Pattern.compile(
             "^[#]+", // 匹配行首的一个或多个 # 符号
             Pattern.MULTILINE
     );
+
 
 
     private String generateSummaryContent(String fullContent) {

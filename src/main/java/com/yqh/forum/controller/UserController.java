@@ -3,9 +3,8 @@ package com.yqh.forum.controller;
 import com.yqh.forum.dto.UserDTO;
 import com.yqh.forum.dto.UserRegistrationDTO;
 import com.yqh.forum.model.User;
-import com.yqh.forum.security.ForumUserDetails;
+import com.yqh.forum.config.security.ForumUserDetails;
 import com.yqh.forum.service.UserService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,7 +27,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
 import java.util.Collection;
 
 /**

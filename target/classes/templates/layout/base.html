@@ -10,6 +10,9 @@
     <!--    markdown css 子组件使用-->
     <link href="/css/easymde.min.css" rel="stylesheet" >
     <link href="/css/font-awesome.min.css" rel="stylesheet">
+    <!--代码高亮-->
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.css">-->
+
     <!--    bootstrap js-->
     <script src="/js/bootstrap.bundle.min.js"></script>
     <!--    -->
@@ -19,9 +22,6 @@
 </head>
 <body>
     <!-- 导航栏-->
-    <!---->
-    <!--<nav class="navbar navbar-expand-lg navbar-dark"-->
-    <!--     th:classappend="${#authentication.principal != null and #authorization.expression('hasRole(''ROLE_ADMIN'')')} ? 'bg-danger' : 'bg-dark'">-->
     <nav class="navbar navbar-expand-lg"
          th:classappend="${!#authorization.expression('isAuthenticated()')} ? 'navbar-light bg-warning' : (
                 ${#authorization.expression('hasRole(''ROLE_ADMIN'')')} ? 'navbar-dark bg-danger' : 'navbar-dark bg-dark'
@@ -50,10 +50,10 @@
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{/roadmap}">技术路线</a>
                     </li>
-                    <!--管理员独有选项-->
-                    <!--用户管理-->
+                    <!--管理员面板-->
                     <li class="nav-item" sec:authorize="hasRole('ROLE_ADMIN')">
-                        <a class="nav-link" th:href="@{/admin/users/dashboard(view='charts')}">用户管理</a>
+                        <!--默认传递charts-->
+                        <a class="nav-link" th:href="@{/admin/users/dashboard}">管理面板</a>
                     </li>
 
 
@@ -83,7 +83,6 @@
                             <!--下拉菜单的内容-->
                             <li><a class="dropdown-item" href="/user/profile">个人资料</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <!--将其改为一个a标签，使用get请求发送，使用post会导致进入页面的一个账号输入错误-->
                             <li>
                                 <a class="dropdown-item" th:href="@{/user/login}">切换用户</a>
                             </li>

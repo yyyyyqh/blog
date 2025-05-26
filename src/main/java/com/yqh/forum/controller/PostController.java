@@ -195,8 +195,9 @@ public class PostController {
 
         //解析markdown
         String markdownContent = post.getContent();
-        // 请确保 MarkdownUtil 及其 convertMarkdownToHtml 方法已正确实现且可用
-        String rawHtmlContent = com.yqh.forum.service.util.MarkdownUtil.convertMarkdownToHtml(markdownContent); // Assuming package path
+        //转换html
+        String rawHtmlContent = com.yqh.forum.service.util.MarkdownUtil.convertMarkdownToHtml(markdownContent);
+        //对html添加id
         String htmlContentWithIds = HtmlHeadingIdUtil.addIdsToHtmlHeadings(rawHtmlContent);
 
         System.out.println(htmlContentWithIds);

@@ -1,4 +1,4 @@
-package com.yqh.forum.config; // 建议放在 config 包下，或者单独的 init/bootstrap 包
+package com.yqh.forum.config.init; // 建议放在 config 包下，或者单独的 init/bootstrap 包
 
 import com.yqh.forum.model.Role; // 确保导入 Role 类
 import com.yqh.forum.model.User;
@@ -10,21 +10,19 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * 用户数据初始化
- * 默认创建一个默认用户 'root'，密码为 'root'，并赋予 'ROLE_ADMIN' 角色
+ * 初始化一个root角色
  */
-@Component // 确保 Spring 能够发现并注册这个 Bean
+@Component
 @RequiredArgsConstructor // Lombok 注解，为 final 字段生成构造函数，用于依赖注入
 public class UserInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository; // 注入 RoleRepository，用于管理角色
-    private final PasswordEncoder passwordEncoder; // 注入 PasswordEncoder
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) throws Exception {

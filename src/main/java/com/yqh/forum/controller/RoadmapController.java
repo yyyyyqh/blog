@@ -36,10 +36,6 @@ public class RoadmapController {
         // 将 PDF 列表添加到 Model 中，名称为 "pdfList"
         model.addAttribute("pdfList", pdfList);
 
-        // 您之前添加的 roadmap.sh 链接或 PDF 嵌入也可以保留在模板中，或者在这里选择只展示网格
-        // model.addAttribute("onlineRoadmapUrl", "https://roadmap.sh/");
-
-
         // 返回对应的 Thymeleaf 模板名称
         return "roadmap/index";
     }

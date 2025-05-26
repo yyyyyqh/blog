@@ -69,8 +69,7 @@ public class SecurityConfig {
         
         return http.build();
     }
-
-    //@Bean 方法本身就是将 BCryptPasswordEncoder 的实例作为一个 Spring Bean 放入了 Spring 的应用上下文中。当 Spring 启动时，它会扫描带有 @Bean 注解的方法，执行它们并将返回的对象注册为 Bean。
+    // 使用BCrypt加密密码
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(); // 使用BCrypt加密密码
