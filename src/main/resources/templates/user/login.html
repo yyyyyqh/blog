@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>登录 - 论坛系统</title>
     <link href="/css/bootstrap.min.css" rel="stylesheet">
-    <!--<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">-->
     <style>
         body {
             background-color: #f8f9fa;
@@ -31,48 +30,84 @@
             text-align: center;
             margin-top: 20px;
         }
+        /* Style for the flash message to fade out */
+        .alert-fade-out {
+            opacity: 1;
+            transition: opacity 0.5s ease-out 2s; /* Start fading after 2s, over 0.5s */
+        }
+        .alert-fade-out.fade-out {
+            opacity: 0;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="login-container">
-            <div class="login-header">
-                <h2>用户登录</h2>
+<div class="container">
+    <div class="login-container">
+        <div class="login-header">
+            <h2>用户登录</h2>
+        </div>
+
+        <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            用户名或密码错误
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:if="${param.registered}" class="alert alert-success alert-dismissible fade show" role="alert">
+            注册成功，请登录
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:if="${successMessage}" id="flashSuccessMessage" class="alert alert-success alert-dismissible fade show alert-fade-out" role="alert">
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+
+        <form th:action="@{/user/login}" method="post" class="login-form">
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" class="form-control" id="username" name="username" required autofocus>
             </div>
-            
-            <div th:if="${param.error}" class="alert alert-danger">
-                用户名或密码错误
+
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" class="form-control" id="password" name="password" required>
             </div>
-            
-            <div th:if="${param.registered}" class="alert alert-success">
-                注册成功，请登录
+
+            <div class="form-group form-check">
+                <input type="checkbox" class="form-check-input" id="remember-me" name="remember-me">
+                <label class="form-check-label" for="remember-me">记住我</label>
             </div>
-            
-            <form th:action="@{/user/login}" method="post" class="login-form">
-                <div class="form-group">
-                    <label for="username">用户名</label>
-                    <input type="text" class="form-control" id="username" name="username" required autofocus>
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">密码</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
-                </div>
-                
-                <div class="form-group form-check">
-                    <input type="checkbox" class="form-check-input" id="remember-me" name="remember-me">
-                    <label class="form-check-label" for="remember-me">记住我</label>
-                </div>
-                
-                <button type="submit" class="btn btn-primary w-100">登录</button>
-            </form>
-            
-            <div class="register-link">
-                <p>还没有账号？ <a th:href="@{/user/register}">立即注册</a></p>
-            </div>
+
+            <button type="submit" class="btn btn-primary w-100">登录</button>
+        </form>
+
+        <div class="register-link">
+            <p>还没有账号？ <a th:href="@{/user/register}">立即注册</a></p>
         </div>
     </div>
-    
-    <script src="/js/bootstrap.bundle.min.js"></script>
+</div>
+
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Optional: JavaScript to make the flash message truly disappear after fading
+    document.addEventListener('DOMContentLoaded', function () {
+        const flashMessage = document.getElementById('flashSuccessMessage');
+        if (flashMessage) {
+            // Wait for the fade-out transition to start (defined as 2s delay in CSS)
+            // then add class to trigger fade-out, then remove element
+            setTimeout(function() {
+                flashMessage.classList.add('fade-out');
+                // After the fade-out transition completes (0.5s), remove the element
+                setTimeout(function() {
+                    if (flashMessage.parentElement) {
+                        // flashMessage.style.display = 'none'; // Alternative to removing
+                        flashMessage.remove();
+                    }
+                }, 500); // Matches the CSS transition duration
+            }, 2000); // Matches the CSS transition-delay
+        }
+    });
+</script>
 </body>
-</html> 
+</html>

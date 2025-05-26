@@ -57,7 +57,7 @@ public class UserController {
 
     @PostMapping("/register")
     public String registerUser(@Valid @ModelAttribute("user") UserRegistrationDTO registrationDTO,
-                             BindingResult result,
+                             BindingResult result, // @Valid后面紧跟BindingResult来接收校验错误
                              RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             return "user/register";
@@ -65,6 +65,7 @@ public class UserController {
 
         try {
             userService.registerNewUser(registrationDTO);
+            // TODO: 在登录后将successMessage传递到 redirectAttributes
             redirectAttributes.addFlashAttribute("successMessage", "注册成功，请登录");
             return "redirect:/user/login";
         } catch (RuntimeException e) {
