@@ -1,6 +1,7 @@
 package com.yqh.forum.controller; // 请根据您的实际包结构调整
 
 import com.yqh.forum.model.User;
+import com.yqh.forum.service.DashboardAnalyticsService;
 import com.yqh.forum.service.EmailService;
 import com.yqh.forum.service.UserService; // 假设您已经有了处理用户相关业务逻辑的 UserService
 // import com.yqh.forum.service.impl.EmailServiceImpl; // Assuming EmailService is an interface
@@ -16,8 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping; // 导入 @Reques
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 管理员用户的操作
@@ -30,6 +33,7 @@ public class AdminUserController {
 
     private final UserService userService; // 注入 UserService，用于后续获取用户数据
     private final EmailService emailService;
+    private final DashboardAnalyticsService dashboardAnalyticsService; // << --- 注入新的服务
 
     /**
      * 显示统一的用户管理仪表板页面
@@ -39,15 +43,13 @@ public class AdminUserController {
     @GetMapping("/dashboard")
     public String showDashboard(@RequestParam(name = "view", defaultValue = "charts") String view, Model model) {
         model.addAttribute("currentView", view);
-        // Add any data needed for stat cards universally here, e.g.:
-        // model.addAttribute("totalUserCount", userService.getUserCount());
-        // model.addAttribute("totalPostCount", postService.getPostCount()); // Assuming you have postService
+        model.addAttribute("currentView", view);
 
-        // 使用占位数据直到服务层实现:
-        model.addAttribute("totalUserCount", userService.getAllUsers().size()); // 简单的示例
-        model.addAttribute("totalPostCount", 5678); // 替换为 postService.getTotalPostCount()
-        model.addAttribute("totalCommentCount", 12345); // 替换为 commentService.getTotalCommentCount()
-        model.addAttribute("todayActiveUserCount", 150); // 替换为 userService.getTodayActiveUserCount()
+        // 总览卡片数据
+        model.addAttribute("totalUserCount", dashboardAnalyticsService.getTotalUserCount());
+        model.addAttribute("totalPostCount", dashboardAnalyticsService.getTotalPostCount());
+        model.addAttribute("totalCommentCount", dashboardAnalyticsService.getTotalCommentCount());
+        model.addAttribute("todayActiveUserCount", dashboardAnalyticsService.getTodayActiveUserCount());
 
         switch (view) {
             case "delete_list":
@@ -62,27 +64,31 @@ public class AdminUserController {
                 break;
             case "charts":
             default:
-                // Add any data specific to charts if they are dynamic
-                // e.g., model.addAttribute("userRegistrationData", userService.getWeeklyUserRegistration());
                 model.addAttribute("title", "后台管理面板 - 数据可视化");
-                model.addAttribute("currentView", "charts"); // Ensure default is explicitly set
+                model.addAttribute("currentView", "charts");
 
-                // 使用占位图表数据：
-                List<String> last7DaysLabels = Arrays.asList("D-6", "D-5", "D-4", "D-3", "D-2", "昨天", "今天");
-                model.addAttribute("userRegistrationLabels", last7DaysLabels);
-                model.addAttribute("userRegistrationData", Arrays.asList(10, 15, 8, 12, 17, 20, 222));
+                // 用户注册趋势
+                Map<String, Long> userRegTrend = dashboardAnalyticsService.getUserRegistrationTrendLast7Days();
+                model.addAttribute("userRegistrationLabels", new ArrayList<>(userRegTrend.keySet()));
+                model.addAttribute("userRegistrationData", new ArrayList<>(userRegTrend.values()));
 
-                model.addAttribute("postCreationLabels", last7DaysLabels);
-                model.addAttribute("postCreationData", Arrays.asList(25, 30, 22, 35, 40, 33, 45));
+                // 帖子创建趋势
+                Map<String, Long> postCreationTrend = dashboardAnalyticsService.getPostCreationTrendLast7Days();
+                model.addAttribute("postCreationLabels", new ArrayList<>(postCreationTrend.keySet()));
+                model.addAttribute("postCreationData", new ArrayList<>(postCreationTrend.values()));
 
-                model.addAttribute("commentCreationLabels", last7DaysLabels);
-                model.addAttribute("commentCreationData", Arrays.asList(50, 55, 60, 45, 70, 80, 75));
+                // 评论创建趋势
+                Map<String, Long> commentCreationTrend = dashboardAnalyticsService.getCommentCreationTrendLast7Days();
+                model.addAttribute("commentCreationLabels", new ArrayList<>(commentCreationTrend.keySet()));
+                model.addAttribute("commentCreationData", new ArrayList<>(commentCreationTrend.values()));
 
-                model.addAttribute("dauTrendLabels", last7DaysLabels);
-                model.addAttribute("dauTrendData", Arrays.asList(100, 110, 105, 120, 130, 125, 140));
+                // DAU趋势
+                Map<String, Long> dauTrend = dashboardAnalyticsService.getDauTrendLast7Days();
+                model.addAttribute("dauTrendLabels", new ArrayList<>(dauTrend.keySet()));
+                model.addAttribute("dauTrendData", new ArrayList<>(dauTrend.values()));
                 break;
         }
-        return "admin/users/admin_dashboard"; // Returns the main enhanced dashboard page
+        return "admin/users/admin_dashboard";
     }
 
     /**
