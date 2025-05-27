@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-<div th:fragment="content">
+<div th:fragment="content (userRegistrationLabels, userRegistrationData, postCreationLabels, postCreationData, commentCreationLabels, commentCreationData, dauTrendLabels, dauTrendData)">
     <div class="row">
         <div class="col-lg-6"> <div class="custom-chart-block">
             <div class="canvas-wrapper">
@@ -88,17 +88,17 @@
                     let pointRadius = 0;
                     let pointHoverRadius = 0;
                     if (type === 'line') {
-                        pointRadius = data.length > 1 ? 3 : 5; // Larger points if only one data point
-                        pointHoverRadius = data.length > 1 ? 5 : 7;
+                        pointRadius = data && data.length > 1 ? 3 : 5; // Larger points if only one data point
+                        pointHoverRadius = data && data.length > 1 ? 5 : 7;
                     }
 
                     return {
                         type: type,
                         data: {
-                            labels: labels,
+                            labels: labels || [], // Default to empty array if labels is null/undefined
                             datasets: [{
                                 label: datasetLabel,
-                                data: data,
+                                data: data || [], // Default to empty array if data is null/undefined
                                 backgroundColor: backgroundColor || (type === 'bar' ? 'rgba(54, 162, 235, 0.6)' : 'rgba(54, 162, 235, 0.1)'),
                                 borderColor: borderColor || 'rgba(54, 162, 235, 1)',
                                 borderWidth: type === 'bar' ? 1 : 2, // Thinner border for bar
@@ -139,17 +139,25 @@
                     };
                 }
 
-                const last7DaysLabels = ['D-6', 'D-5', 'D-4', 'D-3', 'D-2', 'Yesterday', 'Today'];
-                const sampleUserRegistrations = { labels: last7DaysLabels, data: [12, 19, 8, 15, 12, 13, 20] };
-                const samplePostCreations    = { labels: last7DaysLabels, data: [30, 25, 38, 25, 32, 28, 45] };
-                const sampleCommentCreations = { labels: last7DaysLabels, data: [50, 65, 55, 78, 65, 75, 90] };
-                const sampleDauTrend         = { labels: last7DaysLabels, data: [120, 135, 120, 135, 150, 145, 160] };
+                // 从Thymeleaf模型属性（通过片段参数传递）获取真实数据
+                // 如果Thymeleaf变量为null，则提供一个空的JS数组作为后备，以避免JS错误
+                const uRLabels = /*[[${userRegistrationLabels}]]*/ [];
+                const uRData = /*[[${userRegistrationData}]]*/ [];
+
+                const pCLabels = /*[[${postCreationLabels}]]*/ [];
+                const pCData = /*[[${postCreationData}]]*/ [];
+
+                const cCLabels = /*[[${commentCreationLabels}]]*/ [];
+                const cCData = /*[[${commentCreationData}]]*/ [];
+
+                const dauLabels = /*[[${dauTrendLabels}]]*/ [];
+                const dauData = /*[[${dauTrendData}]]*/ [];
 
                 const chartsToInit = [
-                    { id: 'userRegistrationChart', config: createChartConfig(sampleUserRegistrations.labels, sampleUserRegistrations.data, 'New Users', 'line', 'rgba(0, 123, 255, 0.1)', 'rgb(0, 123, 255)') },
-                    { id: 'postCreationChart', config: createChartConfig(samplePostCreations.labels, samplePostCreations.data, 'New Posts', 'bar', 'rgba(40, 167, 69, 0.6)', 'rgb(40, 167, 69)') },
-                    { id: 'commentCreationChart', config: createChartConfig(sampleCommentCreations.labels, sampleCommentCreations.data, 'New Comments', 'line', 'rgba(255, 193, 7, 0.1)', 'rgb(255, 193, 7)') },
-                    { id: 'dauChart', config: createChartConfig(sampleDauTrend.labels, sampleDauTrend.data, 'Daily Active Users', 'bar', 'rgba(220, 53, 69, 0.6)', 'rgb(220, 53, 69)') }
+                    { id: 'userRegistrationChart', config: createChartConfig(uRLabels, uRData, '新用户', 'line', 'rgba(0, 123, 255, 0.1)', 'rgb(0, 123, 255)') },
+                    { id: 'postCreationChart', config: createChartConfig(pCLabels, pCData, '新帖子', 'bar', 'rgba(40, 167, 69, 0.6)', 'rgb(40, 167, 69)') },
+                    { id: 'commentCreationChart', config: createChartConfig(cCLabels, cCData, '新评论', 'line', 'rgba(255, 193, 7, 0.1)', 'rgb(255, 193, 7)') },
+                    { id: 'dauChart', config: createChartConfig(dauLabels, dauData, '日活跃用户', 'bar', 'rgba(220, 53, 69, 0.6)', 'rgb(220, 53, 69)') }
                 ];
 
                 chartsToInit.forEach(chartItem => {
@@ -178,10 +186,8 @@
 
             }, 250);
 
-            initializeCharts();
-            // Consider re-initializing on window resize if layouts are very dynamic,
-            // though Chart.js responsive option usually handles this.
-            // window.addEventListener('resize', initializeCharts); // Be cautious with this, debounce is essential
+            initializeCharts(); // 调用初始化函数
+            // window.addEventListener('resize', initializeCharts); // 如果需要动态布局，请谨慎使用此行，并确保debounce有效
         });
         /*]]>*/
     </script>

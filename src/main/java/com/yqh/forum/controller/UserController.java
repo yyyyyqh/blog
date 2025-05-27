@@ -65,7 +65,6 @@ public class UserController {
 
         try {
             userService.registerNewUser(registrationDTO);
-            // TODO: 在登录后将successMessage传递到 redirectAttributes
             redirectAttributes.addFlashAttribute("successMessage", "注册成功，请登录");
             return "redirect:/user/login";
         } catch (RuntimeException e) {

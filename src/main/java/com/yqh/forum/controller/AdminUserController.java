@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping; // 导入 @Reques
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -42,6 +43,12 @@ public class AdminUserController {
         // model.addAttribute("totalUserCount", userService.getUserCount());
         // model.addAttribute("totalPostCount", postService.getPostCount()); // Assuming you have postService
 
+        // 使用占位数据直到服务层实现:
+        model.addAttribute("totalUserCount", userService.getAllUsers().size()); // 简单的示例
+        model.addAttribute("totalPostCount", 5678); // 替换为 postService.getTotalPostCount()
+        model.addAttribute("totalCommentCount", 12345); // 替换为 commentService.getTotalCommentCount()
+        model.addAttribute("todayActiveUserCount", 150); // 替换为 userService.getTodayActiveUserCount()
+
         switch (view) {
             case "delete_list":
                 List<User> usersForDelete = userService.getAllUsers();
@@ -59,6 +66,20 @@ public class AdminUserController {
                 // e.g., model.addAttribute("userRegistrationData", userService.getWeeklyUserRegistration());
                 model.addAttribute("title", "后台管理面板 - 数据可视化");
                 model.addAttribute("currentView", "charts"); // Ensure default is explicitly set
+
+                // 使用占位图表数据：
+                List<String> last7DaysLabels = Arrays.asList("D-6", "D-5", "D-4", "D-3", "D-2", "昨天", "今天");
+                model.addAttribute("userRegistrationLabels", last7DaysLabels);
+                model.addAttribute("userRegistrationData", Arrays.asList(10, 15, 8, 12, 17, 20, 222));
+
+                model.addAttribute("postCreationLabels", last7DaysLabels);
+                model.addAttribute("postCreationData", Arrays.asList(25, 30, 22, 35, 40, 33, 45));
+
+                model.addAttribute("commentCreationLabels", last7DaysLabels);
+                model.addAttribute("commentCreationData", Arrays.asList(50, 55, 60, 45, 70, 80, 75));
+
+                model.addAttribute("dauTrendLabels", last7DaysLabels);
+                model.addAttribute("dauTrendData", Arrays.asList(100, 110, 105, 120, 130, 125, 140));
                 break;
         }
         return "admin/users/admin_dashboard"; // Returns the main enhanced dashboard page

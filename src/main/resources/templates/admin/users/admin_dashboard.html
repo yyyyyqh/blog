@@ -2,90 +2,107 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/base}">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title ?: 'Admin Dashboard'}">Admin Dashboard</title> <link href="/css/admin_dashboard.css" rel="stylesheet" th:href="@{/css/admin_dashboard.css}">
+    <link href="/css/bootstrap.min.css" rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link href="/css/font-awesome.min.css" rel="stylesheet" th:href="@{/css/font-awesome.min.css}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        <!--css修改为外部引入-->
-        <link href="/css/admin_dashboard.css" rel="stylesheet">
-        <!--其他必要的css依赖-->
-        <link href="/css/bootstrap.min.css" rel="stylesheet">
-        <link href="/css/font-awesome.min.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
 
-    </head>
-    <body>
+<div layout:fragment="content">
+    <div class="container-fluid mt-3 mb-3">
+        <h2 class="text-center page-title" th:text="${title ?: 'Admin Dashboard'}">Admin Dashboard</h2>
 
-        <div layout:fragment="content">
-            <div class="container-fluid mt-3 mb-3">
-                <h2 class="text-center page-title" th:text="${title ?: 'Admin Dashboard'}">Admin Dashboard</h2>
-
-                <div class="row">
-                    <div class="col-xl-3 col-md-6 mb-xl-0 mb-3">
-                        <div class="dashboard-card">
-                            <h3>总用户数</h3>
-                            <p class="count" th:text="${totalUserCount ?: '1,234'}">1,234</p> </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6 mb-xl-0 mb-3">
-                        <div class="dashboard-card">
-                            <h3>总帖子数</h3>
-                            <p class="count">5,678</p>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6 mb-xl-0 mb-3">
-                        <div class="dashboard-card">
-                            <h3>总评论数</h3>
-                            <p class="count">12,345</p>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6 mb-xl-0 mb-3">
-                        <div class="dashboard-card">
-                            <h3>今日活跃用户</h3>
-                            <p class="count">150</p>
-                        </div>
-                    </div>
+        <div class="row">
+            <div class="col-xl-3 col-md-6 mb-xl-0 mb-3">
+                <div class="dashboard-card">
+                    <h3>总用户数</h3>
+                    <p class="count" th:text="${totalUserCount ?: '0'}">1,234</p>
                 </div>
-                <!--导航栏-->
-                <div class="view-navigation" role="group" aria-label="Admin Dashboard Views">
-                    <div class="btn-group">
-                        <a th:href="@{/admin/users/dashboard(view='charts')}"
-                           class="btn"
-                           th:classappend="${currentView == 'charts' ? 'btn-primary' : 'btn-outline-primary'}">
-                            <i class="fa fa-bar-chart" aria-hidden="true"></i> 数据图表
-                        </a>
-                        <a th:href="@{/admin/users/dashboard(view='delete_list')}"
-                           class="btn"
-                           th:classappend="${currentView == 'delete_list' ? 'btn-primary' : 'btn-outline-primary'}">
-                            <i class="fa fa-trash" aria-hidden="true"></i> 删除用户
-                        </a>
-                        <a th:href="@{/admin/users/dashboard(view='reset_password_list')}"
-                           class="btn"
-                           th:classappend="${currentView == 'reset_password_list' ? 'btn-primary' : 'btn-outline-primary'}">
-                            <i class="fa fa-key" aria-hidden="true"></i> 重置密码
-                        </a>
-                        <a th:href="@{/}"  th:classappend="${currentView == 'all_users_list' ? 'btn-primary' : 'btn-outline-primary'}" class="btn">
-                            <i class="fa fa-home" aria-hidden="true"></i> 返回首页
-                        </a>
-                        <a th:href="@{/admin/users/dashboard(view='roles_management')}" th:classappend="${currentView == 'roles_management' ? 'btn-primary' : 'btn-outline-primary'}" class="btn btn-outline-secondary disabled">
-                            <i class="fa fa-shield" aria-hidden="true"></i> 功能 <small class="text-muted">(待开发)</small>
-                        </a>
-                    </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-xl-0 mb-3">
+                <div class="dashboard-card">
+                    <h3>总帖子数</h3>
+                    <p class="count" th:text="${totalPostCount ?: '0'}">5,678</p>
                 </div>
-
-                <div th:switch="${currentView}">
-                    <div th:case="'charts'">
-                        <div th:replace="~{admin/users/_charts_content :: content}"></div>
-                    </div>
-                    <div th:case="'delete_list'">
-                        <div th:replace="~{admin/users/_user_delete_list_content :: content}"></div>
-                    </div>
-                    <div th:case="'reset_password_list'">
-                        <div th:replace="~{admin/users/_user_reset_password_list_content :: content}"></div>
-                    </div>
-                    <div th:case="*"> <div th:replace="~{admin/users/_charts_content :: content}"></div>
-                    </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-xl-0 mb-3">
+                <div class="dashboard-card">
+                    <h3>总评论数</h3>
+                    <p class="count" th:text="${totalCommentCount ?: '0'}">12,345</p>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-xl-0 mb-3">
+                <div class="dashboard-card">
+                    <h3>今日活跃用户</h3>
+                    <p class="count" th:text="${todayActiveUserCount ?: '0'}">150</p>
                 </div>
             </div>
         </div>
-    </body>
+        <div class="view-navigation" role="group" aria-label="Admin Dashboard Views">
+            <div class="btn-group">
+                <a th:href="@{/admin/users/dashboard(view='charts')}"
+                   class="btn"
+                   th:classappend="${currentView == 'charts' ? 'btn-primary' : 'btn-outline-primary'}">
+                    <i class="fa fa-bar-chart" aria-hidden="true"></i> 数据图表
+                </a>
+                <a th:href="@{/admin/users/dashboard(view='delete_list')}"
+                   class="btn"
+                   th:classappend="${currentView == 'delete_list' ? 'btn-primary' : 'btn-outline-primary'}">
+                    <i class="fa fa-trash" aria-hidden="true"></i> 删除用户
+                </a>
+                <a th:href="@{/admin/users/dashboard(view='reset_password_list')}"
+                   class="btn"
+                   th:classappend="${currentView == 'reset_password_list' ? 'btn-primary' : 'btn-outline-primary'}">
+                    <i class="fa fa-key" aria-hidden="true"></i> 重置密码
+                </a>
+                <a th:href="@{/}" class="btn btn-outline-secondary"> <i class="fa fa-home" aria-hidden="true"></i> 返回首页
+                </a>
+                <a th:href="@{/admin/users/dashboard(view='roles_management')}"
+                   th:classappend="${currentView == 'roles_management' ? 'btn-primary' : 'btn-outline-primary'}"
+                   class="btn btn-outline-secondary disabled"> <i class="fa fa-shield" aria-hidden="true"></i> 功能 <small class="text-muted">(待开发)</small>
+                </a>
+            </div>
+        </div>
+
+        <div th:if="${param.message != null}" class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+            <span th:text="${param.message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${param.error != null}" class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+            <span th:text="${param.error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:switch="${currentView}">
+            <div th:case="'charts'">
+                <!--接收从AdminUserController传入的数据，传递给填入的组件-->
+                <div th:replace="~{admin/users/_charts_content :: content(
+                            userRegistrationLabels=${userRegistrationLabels}, userRegistrationData=${userRegistrationData},
+                            postCreationLabels=${postCreationLabels}, postCreationData=${postCreationData},
+                            commentCreationLabels=${commentCreationLabels}, commentCreationData=${commentCreationData},
+                            dauTrendLabels=${dauTrendLabels}, dauTrendData=${dauTrendData}
+                        )}"></div>
+            </div>
+            <div th:case="'delete_list'">
+                <div th:replace="~{admin/users/_user_delete_list_content :: content}"></div>
+            </div>
+            <div th:case="'reset_password_list'">
+                <div th:replace="~{admin/users/_user_reset_password_list_content :: content}"></div>
+            </div>
+            <div th:case="*"> <div th:replace="~{admin/users/_charts_content :: content(
+                            userRegistrationLabels=${userRegistrationLabels}, userRegistrationData=${userRegistrationData},
+                            postCreationLabels=${postCreationLabels}, postCreationData=${postCreationData},
+                            commentCreationLabels=${commentCreationLabels}, commentCreationData=${commentCreationData},
+                            dauTrendLabels=${dauTrendLabels}, dauTrendData=${dauTrendData}
+                        )}"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
 </html>
