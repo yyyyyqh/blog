@@ -39,7 +39,9 @@ public class SecurityConfig {
                         "/images/**",
                         "/webjars/**",
                         "/uploads/avatars/**",
-                        "/uploads/post-images/**"
+                        "/uploads/post-images/**",
+                        //需要发行字体资源，不然不登录的游客无法访问字体
+                        "/fonts/**"
                 ).permitAll()
                 // 放行其他公开路径
                 .antMatchers(

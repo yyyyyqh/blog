@@ -193,7 +193,7 @@ public class PostController {
         }
 
 
-        //解析markdown
+        //获取数据库中的markdown内容
         String markdownContent = post.getContent();
         //转换html
         String rawHtmlContent = com.yqh.forum.service.util.MarkdownUtil.convertMarkdownToHtml(markdownContent);

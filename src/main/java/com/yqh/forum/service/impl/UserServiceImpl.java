@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class); // 将 YourClassName.class 替换为您的实际类名.class
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
 
     //注册新用户
@@ -41,6 +41,7 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("用户名已存在");
         }
 
+        //抛出异常
         if (userRepository.existsByEmail(registrationDTO.getEmail())) {
             throw new RuntimeException("邮箱已被注册");
         }

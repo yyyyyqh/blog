@@ -9,6 +9,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface EmailService {
-    void sendPasswordResetEmail(String to, String subject, String text);
+    //void sendPasswordResetEmail(String to, String subject, String text);
     void sendTemporaryPasswordEmail(String to, String userName, String newTemporaryPassword);
 }
